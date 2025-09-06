@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 0.0.20
+
+- Fixed the badge version number.
+
 ## 0.0.19
 
 - Fixed an incorrect link to the Marketplace.
