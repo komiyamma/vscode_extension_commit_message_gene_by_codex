@@ -37,7 +37,7 @@ class Program
 
         // promptの日本語・英語バージョン
         string promptJa = "このリポジトリで、gitでステージングされていればステージング対象のみ、されていなければ「次に行う予定のコミット」を対象として、日本語でConventional Commits（type[scope]: subject を先頭、必要なら本文/フッター可）に則ったコミットメッセージを考案し、出力は『■★■★■』→改行→メッセージ→改行→『▲★▲★▲』のみに限定（前置き・後置き・見出し・注釈・コードブロック・引用・余計な文字列は一切禁止）、コミット実行やファイル作成・編集は行わず、git系以外のコマンドは実行せず、コミットメッセージ以外は何も出力しないでください。";
-        string promptEn = "In this repository, if files are staged in git, devise a English commit message only for the staged changes; if no files are staged, devise a English commit message for the 'next planned commit'; in either case, do not actually perform the commit but only provide the message text, always begin the commit message with '■★■★■' followed by a line break and end it with a line break plus '▲★▲★▲', strictly write the message according to Conventional Commits without adding any unusual notes or remarks, never create or edit files, and never execute non-git commands.";
+        string promptEn = "For this repository, if it is staged with git, write only the staged target, or if not, write the \"next planned commit\" for it. Create a commit message in English that conforms to Conventional Commits (type[scope]: subject at the beginning, body/footer allowed if necessary), and limit output to \"■★■★■\" → line break → message → line break → \"▲★▲★▲\" only (prefaces, postfaces, headings, comments, code blocks, quotes, and unnecessary characters are strictly prohibited). Do not perform commits, create or edit files, do not run commands other than git, and do not output anything other than the commit message.\r\n";
 
         // 言語に応じた prompt を選択
         string prompt = lang == "en" ? promptEn : promptJa;
