@@ -6,8 +6,10 @@
   "version": "0.0.18",
   "repository": {
     "type": "git",
-    "url": "https://github.com/komiyamma/vscode_extension_commit-mesasge-gene-by-codex"
-  },  "license": "MIT",
+    "url": "https://github.com/komiyamma/vscode_extension_commit_mesasge_gene_by_codex"
+  },
+  "license": "MIT",
+  "homepage": "https://komiyamma.net/?page=page-vscode-extension-commit-mesasge-gene-by-codex",
   "engines": {
     "vscode": "^1.103.0"
   },
