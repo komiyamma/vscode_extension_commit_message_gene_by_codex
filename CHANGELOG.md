@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 0.1.3
+
+- Fixed a problem where commit messages were prone to errors when the display language was English.
+
 ## 0.1.2
 
 - Handle cases where the installation path of npm -g is non-standard.
