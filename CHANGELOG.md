@@ -1,5 +1,8 @@
-
 # Change Log
+
+## 0.1.4
+
+- Changed the command name in the Command Palette to "Commit message generation by codex" for better clarity.
 
 ## 0.1.3
 

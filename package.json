@@ -3,7 +3,7 @@
   "name": "commit-message-gene-by-codex",
   "displayName": "commit-message-gene-by-codex",
   "description": "Generates commit messages in codex environments. It is intended for use when 'Github Copilot' is no longer available or with 'AWS kiro'.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/komiyamma/vscode_extension_commit_message_gene_by_codex"
@@ -13,6 +13,7 @@
   "engines": {
     "vscode": "^1.100.0"
   },
+  "icon": "resources/icons/logo.png",
   "categories": [
     "Other"
   ],
