@@ -1,6 +1,6 @@
 [To Japanese Version README](README.ja.md)
 
-[![Version](https://img.shields.io/badge/version-v0.0.20-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-mesasge-gene-by-codex)
+[![Version](https://img.shields.io/badge/version-v0.1.1-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-mesasge-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
 

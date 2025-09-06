@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 0.1.1
+
+- Support for Japanese and English
+
 ## 0.0.20
 
 - Fixed the badge version number.

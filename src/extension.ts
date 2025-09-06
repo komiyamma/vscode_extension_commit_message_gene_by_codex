@@ -4,6 +4,32 @@ import * as vscode from 'vscode';
 import { spawn } from 'child_process';
 import * as path from 'path';
 
+// 言語判定: VS Code のUI言語が日本語(ja*)かどうか
+const isJapanese = (): boolean => {
+	const lang = (vscode.env.language || '').toLowerCase();
+	return lang === 'ja' || lang.startsWith('ja-');
+};
+
+// メッセージ辞書: 日本語/英語（その他言語は英語を既定）
+const M = {
+	outputChannel: () => (isJapanese() ? 'commit message gene' : 'commit message gene'), // 固有名は共通
+	status: {
+		generating: () => (isJapanese() ? '$(sync~spin) ★コミットメッセージを生成中★' : '$(sync~spin) Generating commit message...'),
+		generatingTip: () => (isJapanese() ? 'Commit Message を生成しています' : 'Generating commit message'),
+	},
+	commitArea: {
+		copiedGitApi: () => (isJapanese() ? '[コミットメッセージ欄に転写しました: git API]' : '[Committed message pasted: git API]'),
+		copiedScm: () => (isJapanese() ? '[コミットメッセージ欄に転写しました: scm.inputBox]' : '[Committed message pasted: scm.inputBox]'),
+		warnNoAccess: () => (isJapanese() ? '[警告] コミットメッセージ欄にアクセスできませんでした' : '[Warn] Could not access commit message box'),
+		errorSet: (e: any) => (isJapanese() ? `[エラー] コミットメッセージ設定に失敗: ${e?.message ?? e}` : `[Error] Failed to set commit message: ${e?.message ?? e}`),
+		copiedDone: () => (isJapanese() ? '\n[コミットメッセージをコミット入力欄へ転写しました]' : '\n[Commit message pasted into input]'),
+	},
+	codex: {
+		runError: (msg: string) => (isJapanese() ? `[codex_proxy.exe 実行エラー]: ${msg}` : `[codex_proxy.exe run error]: ${msg}`),
+		closed: (code: number|null) => (isJapanese() ? `\n[codex_proxy.exe 終了: code ${code}]` : `\n[codex_proxy.exe exited: code ${code}]`),
+	},
+};
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -22,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const repos = (gitApi?.repositories ?? []) as any[];
 				if (repos.length > 0 && repos[0]?.inputBox) {
 					repos[0].inputBox.value = message;
-					output.appendLine('[コミットメッセージ欄に転写しました: git API]');
+					output.appendLine(M.commitArea.copiedGitApi());
 					return;
 				}
 			}
@@ -30,12 +56,12 @@ export function activate(context: vscode.ExtensionContext) {
 			const scmAny = vscode.scm as any;
 			if (scmAny && scmAny.inputBox) {
 				scmAny.inputBox.value = message;
-				output.appendLine('[コミットメッセージ欄に転写しました: scm.inputBox]');
+				output.appendLine(M.commitArea.copiedScm());
 				return;
 			}
-			output.appendLine('[警告] コミットメッセージ欄にアクセスできませんでした');
+			output.appendLine(M.commitArea.warnNoAccess());
 		} catch (e: any) {
-			output.appendLine(`[エラー] コミットメッセージ設定に失敗: ${e?.message ?? e}`);
+			output.appendLine(M.commitArea.errorSet(e));
 		}
 	}
 
@@ -43,17 +69,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
 	const codexDisposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.runCodexCmd', async () => {
-		const output = vscode.window.createOutputChannel('commit message gene');
+		const output = vscode.window.createOutputChannel(M.outputChannel());
 		// 出力パネルは自動表示しない（必要なときだけ手動で開く）
 		// output.show(true);
 
 		// ステータスバーに実行中スピナーを表示
 		const statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
-		statusItem.text = '$(sync~spin) ★コミットメッセージを生成中★';
-		statusItem.tooltip = 'Commit Message を生成しています';
+		statusItem.text = M.status.generating();
+		statusItem.tooltip = M.status.generatingTip();
 		statusItem.show();
 		const proxyPath = path.join(__dirname, 'codex_proxy.exe');
-		const proc = spawn(proxyPath, ['utf8'], { cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath });
+		const localeArg = isJapanese() ? 'ja' : 'en';
+		const proc = spawn(proxyPath, ['utf8', localeArg], { cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath });
 		let buffer = '';
 		// マーカー行を出力チャンネルに表示しないためのヘルパー
 		const containsMarker = (line: string) => {
@@ -88,12 +115,12 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 		proc.on('error', (err) => {
-			output.appendLine(`[codex_proxy.exe 実行エラー]: ${err.message}`);
+			output.appendLine(M.codex.runError(err.message));
 			statusItem.hide();
 			statusItem.dispose();
 		});
 		proc.on('close', async (code) => {
-			output.appendLine(`\n[codex_proxy.exe 終了: code ${code}]`);
+			output.appendLine(M.codex.closed(code));
 			statusItem.hide();
 			statusItem.dispose();
 			// 最終行に改行がなかった場合の残余をフラッシュ（必要なら）
@@ -113,7 +140,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const commitMsg = commitLines.join('\n');
 									// コミットメッセージ欄へ設定（git API優先、フォールバックあり）
 									await setCommitMessage(commitMsg, output);
-				output.appendLine('\n[コミットメッセージをコミット入力欄へ転写しました]');
+					output.appendLine(M.commitArea.copiedDone());
 			}
 		});
 	});
