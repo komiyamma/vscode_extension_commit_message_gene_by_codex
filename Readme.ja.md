@@ -13,16 +13,13 @@
 
 ## 要件
 
-- 生成後のメッセージは以下に反映/保存されます:
+- 生成後のメッセージは以下に反映されます:
   - ソース管理ビューのコミットメッセージ入力欄に挿入
-  - ワークスペース直下に `.vscode-commit-message.txt` として保存
 
 - ヘルパーは `%APPDATA%\npm\codex.cmd` を探し、`cmd.exe` 経由で実行します。
 - `codex.cmd` が上記パスに存在するよう、codex CLI をグローバルにインストールしておいてください。
 
-```powershell
-codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
-```
+  codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 
 - プロンプトは Codex に対し、日本語の最終コミットメッセージのみを出力し、全文を特定のマーカー行で囲むよう要求します。
   - ソース管理ビューを一度開いてから再試行してください。
@@ -35,19 +32,17 @@ codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_age
    - 「Commit message generation command execution」(`commit-mesasge-gene-by-codex.runCodexCmd`)
    - コマンドパレット (Ctrl+Shift+P) で「Commit message generation」と入力して検索できます
 2. 実行中は出力パネルの「codex exec output」を確認します。
-3. 完了すると、生成メッセージは次のとおりになります:
-   - ソース管理のコミットメッセージ入力欄に挿入
-   - ワークスペース直下に `.vscode-commit-message.txt` として保存
+3. 完了すると、生成メッセージはソース管理のコミットメッセージ入力欄に挿入されます。
 
 ## 仕組み
 
 - 拡張機能は `utf8` フラグ付きで `codex_proxy.exe`（コンパイル済み拡張の隣に同梱）を起動します。
 - ヘルパーは `%APPDATA%\npm\codex.cmd` を見つけて、次のコマンドを実行します:
 
-  `codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox`
+  codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 
 - プロンプトは Codex に対し、日本語の最終コミットメッセージのみを出力し、全文を特定のマーカー行で囲むよう要求します。
-- 拡張機能は標準出力からマーカー間のテキストを抽出し、`.vscode-commit-message.txt` に保存したうえで、Git 拡張 API（フォールバックとして `scm.inputBox`）を通じてコミット入力欄に書き込みます。
+- 拡張機能は標準出力からマーカー間のテキストを抽出し、Git 拡張 API（フォールバックとして `scm.inputBox`）を通じてコミット入力欄に書き込みます。
 
 ## プライバシーとデータ
 
@@ -60,7 +55,7 @@ codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_age
   - ソース管理ビューを一度開いてから再試行してください。
   - 組み込みの Git 拡張機能が有効か確認してください。
   - 出力パネルの「codex exec output」でエラーを確認してください。
-- `.vscode-commit-message.txt` が作成されない: ワークスペースに書き込み権限があるか、コマンドがエラーなく完了したか確認してください。
+
 
 ## 開発
 

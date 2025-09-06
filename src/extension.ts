@@ -39,16 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "commit-mesasge-gene-by-codex" is now active!');
-
-	// The command has been defined in the package.json file
-	// 既存のHelloWorldコマンド
-	const disposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from commit-mesasge-gene-by-codex!');
-	});
-	context.subscriptions.push(disposable);
+	// （削除）起動時の挨拶ログと未使用の HelloWorld コマンド登録を整理しました
 
 	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
 	const codexDisposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.runCodexCmd', async () => {
@@ -78,13 +69,9 @@ export function activate(context: vscode.ExtensionContext) {
 			if (start !== -1 && end !== -1 && end > start + 1) {
 				const commitLines = lines.slice(start + 1, end);
 				const commitMsg = commitLines.join('\n');
-				const fs = require('fs');
-				const pathCommit = path.join(vscode.workspace.workspaceFolders?.[0].uri.fsPath || '', '.vscode-commit-message.txt');
-				fs.writeFileSync(pathCommit, commitMsg, { encoding: 'utf8' });
 									// コミットメッセージ欄へ設定（git API優先、フォールバックあり）
 									await setCommitMessage(commitMsg, output);
-				output.appendLine(`\n[コミットメッセージを .vscode-commit-message.txt に転写しました]`);
-				output.appendLine('ヒットしました');
+				output.appendLine('\n[コミットメッセージをコミット入力欄へ転写しました]');
 			}
 		});
 	});
