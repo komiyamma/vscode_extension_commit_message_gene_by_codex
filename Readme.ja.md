@@ -1,3 +1,10 @@
+[To English Version README](README.md)
+
+[![Version](https://img.shields.io/badge/version-v0.0.18-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.github100mbyteslimithook)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
+
+
 # コミットメッセージジェネレーター (by Codex)
 
 この拡張機能は、Windows の小さなヘルパー (codex_proxy.exe) を介してローカルの codex CLI を呼び出し、現在のリポジトリ向けに Conventional Commits 形式のコミットメッセージを生成する軽量な VS Code 拡張機能です。GitHub Copilot が使えない環境や、別のプロバイダーを使いたい場合に便利です。
