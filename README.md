@@ -1,6 +1,6 @@
 [To Japanese Version README](README.ja.md)
 
-[![Version](https://img.shields.io/badge/version-v0.1.2-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-mesasge-gene-by-codex)
+[![Version](https://img.shields.io/badge/version-v0.1.2-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
 
@@ -13,7 +13,7 @@ A lightweight VS Code extension that generates a conventional commit message for
 
 - One command to generate a Conventional Commits-style message
 - Writes the result into the Git commit input box automatically
-	- "Commit message generation command execution" (`commit-mesasge-gene-by-codex.runCodexCmd`)
+	- "Commit message generation command execution" (`commit-message-gene-by-codex.runCodexCmd`)
 	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
 
 ## Requirements
@@ -32,7 +32,7 @@ codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide
 ## Usage
 
 1. Run the command:
-	- "Commit message generation command execution" (`commit-mesasge-gene-by-codex.runCodexCmd`)
+	- "Commit message generation command execution" (`commit-message-gene-by-codex.runCodexCmd`)
 	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
 2. Watch "codex exec output" in the Output panel as the helper runs.
 3. When it finishes, the generated message will be inserted into the Source Control commit message input.

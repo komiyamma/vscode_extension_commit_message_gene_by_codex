@@ -1,15 +1,15 @@
 {
   "publisher": "komiyamma",
-  "name": "commit-mesasge-gene-by-codex",
-  "displayName": "commit-mesasge-gene-by-codex",
+  "name": "commit-message-gene-by-codex",
+  "displayName": "commit-message-gene-by-codex",
   "description": "Generates commit messages in codex environments. It is intended for use when 'Github Copilot' is no longer available or with 'AWS kiro'.",
   "version": "0.1.2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/komiyamma/vscode_extension_commit_mesasge_gene_by_codex"
+    "url": "https://github.com/komiyamma/vscode_extension_commit_message_gene_by_codex"
   },
   "license": "MIT",
-  "homepage": "https://komiyamma.net/?page=page-vscode-extension-commit-mesasge-gene-by-codex",
+  "homepage": "https://komiyamma.net/?page=page-vscode-extension-commit-message-gene-by-codex",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -21,7 +21,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "commit-mesasge-gene-by-codex.runCodexCmd",
+        "command": "commit-message-gene-by-codex.runCodexCmd",
         "title": "Commit message generation command execution"
       }
     ]

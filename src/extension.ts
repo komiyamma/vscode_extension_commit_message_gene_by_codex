@@ -68,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// （削除）起動時の挨拶ログと未使用の HelloWorld コマンド登録を整理しました
 
 	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
-	const codexDisposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.runCodexCmd', async () => {
+	const codexDisposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
 		const output = vscode.window.createOutputChannel(M.outputChannel());
 		// 出力パネルは自動表示しない（必要なときだけ手動で開く）
 		// output.show(true);
