@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 0.1.2
+
+- Handle cases where the installation path of npm -g is non-standard.
+- When staging, I made it so that messages are created only for the set of files being staged
+
 ## 0.1.1
 
 - Support for Japanese and English

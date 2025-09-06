@@ -13,10 +13,6 @@ class Program
             Console.OutputEncoding = Encoding.UTF8;
         }
 
-        // codex.cmd の絶対パスを組み立て
-        string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        string codexPath = Path.Combine(appdata, "npm", "codex.cmd");
-
         // 第2引数で言語切り替え（"en" または "ja"、デフォルトは "ja"）
         string lang = "ja";
         if (args.Length > 1)
@@ -25,20 +21,23 @@ class Program
             else if (args[1] == "ja") lang = "ja";
         }
 
-        // ローカライズされたエラーメッセージ
-        string notFoundMessage = lang == "en"
-            ? $"codex command not found: {codexPath}\nPlease confirm it is installed globally with 'npm -g'."
-            : $"codex コマンドが見つかりませんでした: {codexPath}\nnpm -g でインストール済みか確認してください。";
+        // codex 実行ファイルのパスを探索
+        string codexPath = FindCodexCmdPath();
 
-        if (!File.Exists(codexPath))
+        // ローカライズされたエラーメッセージ（見つからない場合)
+        string notFoundMessage = lang == "en"
+            ? "codex command was not found. Ensure it is installed globally (e.g., via 'npm i -g'). Check your npm global prefix with 'npm config get prefix'."
+            : "codex コマンドが見つかりませんでした。グローバルインストール（例: 'npm i -g'）されているか確認し、'npm config get prefix' で npm のグローバル prefix を確認してください。";
+
+        if (string.IsNullOrEmpty(codexPath) || !File.Exists(codexPath))
         {
             Console.Error.WriteLine(notFoundMessage);
             return 1;
         }
 
         // promptの日本語・英語バージョン
-        string promptJa = "このリポジトリで「次に行う予定のコミット」のメッセージを日本語で作成してください（コミットは実行はしません、文面のみ考案してください）。コミットメッセージは、最初に Conventional Commits に則って記述してください。最終返答だけを表示してください。ファイルの作成や編集は絶対に行わないこと。git系以外はコマンド実行しないこと。「コミットメッセージ全体の開始位置」に■★■★■と改行を、「コミットメッセージ全体の終了位置」に改行＋▲★▲★▲＋改行を付けてください。";
-        string promptEn = "Generate a commit message (text only) in English for the next planned commit in this repository. Do not perform the commit, do not modify the repository, and do not create, edit, or delete any files: produce only the commit message text. The commit message must begin at its first character with a Conventional Commits header following the Conventional Commits specification (for example: 'feat:', 'fix:', 'chore:', etc.) and must conform to that format from the very start. Only output the final commit message and nothing else: do not output reasoning, explanations, step lists, or any extra text before, inside, or after the commit message other than what is specified below. Do not execute any commands except git-related commands; do not run any non-git commands. At the very start of the entire commit message output the exact sequence ■★■★■ followed immediately by a single newline character. At the very end of the entire commit message output a single newline, then the exact sequence ▲★▲★▲, then a single newline. Do not include any additional characters, markers, comments, or surrounding text beyond the required start marker, the commit message itself, and the required end marker and their newlines.";
+        string promptJa = "このリポジトリで「gitでステージングされている場合は、ステージングされたもののみを対象としたコミットメッセージを考案してください。」、ステージングされていない場合は、「次に行う予定のコミット」のメッセージを日本語で作成してください。いずれの場合でも「コミットは実行はしません、文面のみ考案してください」。但し、。コミットメッセージは、最初に Conventional Commits に則って記述してください。最終返答だけを表示してください。ファイルの作成や編集は絶対に行わないこと。git系以外はコマンド実行しないこと。「コミットメッセージ全体の開始位置」に■★■★■と改行を、「コミットメッセージ全体の終了位置」に改行＋▲★▲★▲＋改行を付けてください。";
+        string promptEn = "In this repository, if there are files staged in git, you must create a commit message in English that refers strictly and exclusively to the staged content and nothing else, and if there are no files staged in git, you must instead create a commit message in English that refers strictly and exclusively to the next commit that is planned, and in both of these cases you must not execute an actual commit under any circumstances but only generate the commit message text itself, and you must always begin the commit message by following the Conventional Commits specification, and you must display only the final response consisting of the commit message text itself, and you must never create, edit, or delete any files, and you must never run any command other than what is required for generating the commit message, and you must never run any non-git commands, and furthermore you must place the exact marker ■★■★■ followed by a line break at the very beginning of the commit message, and you must place a line break followed by the exact marker ▲★▲★▲ followed by another line break at the very end of the commit message, and you must always ensure that these markers appear exactly as written to surround the entire commit message.";
 
         // 言語に応じた prompt を選択
         string prompt = lang == "en" ? promptEn : promptJa;
@@ -82,5 +81,68 @@ class Program
             Console.Error.WriteLine((lang == "en" ? "Startup error: " : "起動時エラー: ") + ex.Message);
             return 1;
         }
+    }
+
+    // codex.cmd の探索ロジック（Windows/.NET Framework 4.8 を想定）
+    private static string FindCodexCmdPath()
+    {
+        // 1) npm config get prefix の出力を利用し、<prefix>\codex.cmd のみを見る
+        string prefix = TryReadStdout("cmd.exe", "/c npm config get prefix");
+        prefix = NormalizeLine(prefix);
+        if (!string.IsNullOrEmpty(prefix))
+        {
+            string candidate = Path.Combine(prefix, "codex.cmd");
+            if (File.Exists(candidate)) return candidate;
+        }
+
+        // 2) フォールバック %APPDATA%\npm\codex.cmd
+        string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        string fallback = Path.Combine(appdata, "npm", "codex.cmd");
+        if (File.Exists(fallback)) return fallback;
+
+        return null;
+    }
+
+    private static string TryReadStdout(string fileName, string arguments)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = arguments,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8
+            };
+            using (var p = Process.Start(psi))
+            {
+                if (p == null) return null;
+                string stdout = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
+                return stdout;
+            }
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string NormalizeLine(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return s;
+        string t = s.Trim();
+        // 1行目のみを使う
+        int i = t.IndexOf('\n');
+        if (i >= 0) t = t.Substring(0, i).Trim();
+        // 余計な引用符を削除
+        if (t.Length >= 2 && t[0] == '"' && t[t.Length - 1] == '"')
+        {
+            t = t.Substring(1, t.Length - 2);
+        }
+        return t;
     }
 }
