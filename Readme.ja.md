@@ -1,6 +1,6 @@
 [To English Version README](README.md)
 
-[![Version](https://img.shields.io/badge/version-v0.0.18-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.github100mbyteslimithook)
+[![Version](https://img.shields.io/badge/version-v0.0.18-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-mesasge-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
 
@@ -26,7 +26,7 @@
 - ヘルパーは `%APPDATA%\npm\codex.cmd` を探し、`cmd.exe` 経由で実行します。
 - `codex.cmd` が上記パスに存在するよう、codex CLI をグローバルにインストールしておいてください。
 
-  codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
+  codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 
 - プロンプトは Codex に対し、日本語の最終コミットメッセージのみを出力し、全文を特定のマーカー行で囲むよう要求します。
   - ソース管理ビューを一度開いてから再試行してください。
@@ -46,7 +46,7 @@
 - 拡張機能は `utf8` フラグ付きで `codex_proxy.exe`（コンパイル済み拡張の隣に同梱）を起動します。
 - ヘルパーは `%APPDATA%\npm\codex.cmd` を見つけて、次のコマンドを実行します:
 
-  codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
+  codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 
 - プロンプトは Codex に対し、日本語の最終コミットメッセージのみを出力し、全文を特定のマーカー行で囲むよう要求します。
 - 拡張機能は標準出力からマーカー間のテキストを抽出し、Git 拡張 API（フォールバックとして `scm.inputBox`）を通じてコミット入力欄に書き込みます。

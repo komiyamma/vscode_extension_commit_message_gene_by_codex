@@ -3,7 +3,7 @@
   "name": "commit-mesasge-gene-by-codex",
   "displayName": "commit-mesasge-gene-by-codex",
   "description": "Generates commit messages in codex environments. It is intended for use when 'Github Copilot' is no longer available or with 'AWS kiro'.",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "repository": {
     "type": "git",
     "url": "https://github.com/komiyamma/vscode_extension_commit_mesasge_gene_by_codex"
@@ -11,7 +11,7 @@
   "license": "MIT",
   "homepage": "https://komiyamma.net/?page=page-vscode-extension-commit-mesasge-gene-by-codex",
   "engines": {
-    "vscode": "^1.103.0"
+    "vscode": "^1.100.0"
   },
   "categories": [
     "Other"
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/vscode": "^1.103.0",
+    "@types/vscode": "^1.100.0",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
     "@vscode/test-cli": "^0.0.11",

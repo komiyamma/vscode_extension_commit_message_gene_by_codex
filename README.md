@@ -1,6 +1,6 @@
 [To Japanese Version README](README.ja.md)
 
-[![Version](https://img.shields.io/badge/version-v0.0.18-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.github100mbyteslimithook)
+[![Version](https://img.shields.io/badge/version-v0.0.18-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-mesasge-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
 
@@ -25,7 +25,7 @@ A lightweight VS Code extension that generates a conventional commit message for
 
 
 ```powershell
-codex exec "&lt;prompt&gt;" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
+codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 ```
 
 
@@ -43,7 +43,7 @@ codex exec "&lt;prompt&gt;" -m "gpt-5" -c model_reasoning_effort="minimal" -c hi
 - The helper locates `%APPDATA%\npm\codex.cmd` and runs:
 
 ```powershell
-codex exec "&lt;prompt&gt;" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
+codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 ```
 
 - The prompt asks Codex to output only the final commit message in Japanese and to wrap the full message between these exact marker lines.
