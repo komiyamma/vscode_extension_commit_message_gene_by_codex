@@ -15,7 +15,7 @@
 
 - コマンド一発で Conventional Commits スタイルのメッセージを生成
 - 生成結果を Git のコミット入力欄に自動で書き込み
-  - 「Commit message generation command execution」(`commit-message-gene-by-codex.runCodexCmd`)
+  - 「Commit message generation by codex」(`commit-message-gene-by-codex.runCodexCmd`)
   - コマンドパレット (Ctrl+Shift+P) で「Commit message generation」と入力して検索できます
 
 ## 要件
@@ -36,7 +36,7 @@
 ## 使い方
 
 1. 次のコマンドを実行:
-   - 「Commit message generation command execution」(`commit-message-gene-by-codex.runCodexCmd`)
+   - 「Commit message generation by codex」(`commit-message-gene-by-codex.runCodexCmd`)
    - コマンドパレット (Ctrl+Shift+P) で「Commit message generation」と入力して検索できます
 2. 実行中は出力パネルの「codex exec output」を確認します。
 3. 完了すると、生成メッセージはソース管理のコミットメッセージ入力欄に挿入されます。

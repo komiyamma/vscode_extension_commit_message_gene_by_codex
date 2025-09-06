@@ -22,7 +22,7 @@
     "commands": [
       {
         "command": "commit-message-gene-by-codex.runCodexCmd",
-        "title": "Commit message generation command execution"
+        "title": "Commit message generation by codex"
       }
     ]
   },

@@ -13,7 +13,7 @@ A lightweight VS Code extension that generates a conventional commit message for
 
 - One command to generate a Conventional Commits-style message
 - Writes the result into the Git commit input box automatically
-	- "Commit message generation command execution" (`commit-message-gene-by-codex.runCodexCmd`)
+	- "Commit message generation by codex" (`commit-message-gene-by-codex.runCodexCmd`)
 	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
 
 ## Requirements
@@ -32,7 +32,7 @@ codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide
 ## Usage
 
 1. Run the command:
-	- "Commit message generation command execution" (`commit-message-gene-by-codex.runCodexCmd`)
+	- "Commit message generation by codex" (`commit-message-gene-by-codex.runCodexCmd`)
 	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
 2. Watch "codex exec output" in the Output panel as the helper runs.
 3. When it finishes, the generated message will be inserted into the Source Control commit message input.
