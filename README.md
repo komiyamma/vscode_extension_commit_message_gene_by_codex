@@ -1,6 +1,6 @@
 [To Japanese Version README](README.ja.md)
 
-[![Version](https://img.shields.io/badge/version-v0.1.4-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
+[![Version](https://img.shields.io/badge/version-v0.1.6-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
 
@@ -36,6 +36,14 @@ codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide
 	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
 2. Watch "codex exec output" in the Output panel as the helper runs.
 3. When it finishes, the generated message will be inserted into the Source Control commit message input.
+
+## UI
+
+- Button (Source Control)
+	- In the Source Control view, a button is available in the title bar and next to the commit input box. Clicking it runs "Commit message generation by codex".
+	- The button is shown when the Git provider is active.
+- Status bar indicator
+	- While generating, a spinning status bar item appears: "$(sync~spin) Generating commit message...". It hides automatically when finished.
 
 ## How it works
 

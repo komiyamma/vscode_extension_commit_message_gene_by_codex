@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.1.6
+
+- Add buttons to run the command in Source Control (commit input box toolbar and Source Control title bar)
+- Docs: explain button locations and status bar spinner; align EN/JA README
+- Manifest/Menus polish: command icon, activation event, schema fixes
+
 ## 0.1.4
 
 - Changed the command name in the Command Palette to "Commit message generation by codex" for better clarity.

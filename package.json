@@ -3,7 +3,7 @@
   "name": "commit-message-gene-by-codex",
   "displayName": "commit-message-gene-by-codex",
   "description": "Generates commit messages in codex environments. It is intended for use when 'Github Copilot' is no longer available or with 'AWS kiro'.",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/komiyamma/vscode_extension_commit_message_gene_by_codex"
@@ -17,15 +17,35 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+
+  "activationEvents": [
+    "onCommand:commit-message-gene-by-codex.runCodexCmd"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "commit-message-gene-by-codex.runCodexCmd",
-        "title": "Commit message generation by codex"
+        "title": "Commit message generation by codex",
+        "icon": "$(wand)"
       }
-    ]
+    ],
+    "menus": {
+      "scm/inputBox": [
+        {
+          "command": "commit-message-gene-by-codex.runCodexCmd",
+          "group": "navigation@-100",
+          "when": "scmProvider == git"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "commit-message-gene-by-codex.runCodexCmd",
+          "group": "navigation@100",
+          "when": "scmProvider == git"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
