@@ -6,30 +6,26 @@ A lightweight VS Code extension that generates a conventional commit message for
 
 - One command to generate a Conventional Commits-style message
 - Writes the result into the Git commit input box automatically
-- Also stores the message to `.vscode-commit-message.txt` in the workspace root
-- Works entirely on your machine (no VS Code account integration)
+	- "Commit message generation command execution" (`commit-mesasge-gene-by-codex.runCodexCmd`)
+	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
 
 ## Requirements
-
-This extension relies on a local CLI named "codex" being available on Windows:
+	- Inserted into the Source Control commit message input
+	- Saved to `.vscode-commit-message.txt` at the workspace root
 
 - The helper searches `%APPDATA%\npm\codex.cmd` and runs it via `cmd.exe`.
 - Make sure you have installed the codex CLI globally so that `codex.cmd` exists there.
 
-Other notes:
-
-- The packaged helper `codex_proxy.exe` targets .NET Framework 4.8 and is bundled with the extension under `out/`.
-- The extension is intended for Windows environments.
-
-## Installation
-
-1. Install or make sure the codex CLI is available at `%APPDATA%\npm\codex.cmd` (typically installed via a global package manager).
-2. Install this extension (from VSIX or Marketplace once published).
-3. Reload VS Code.
+```
+codex exec "<prompt>" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
+```
+ - The prompt asks Codex to output only the final commit message in Japanese and to wrap the full message between these exact marker lines:
+	- Open the Source Control view once and retry.
+	- Ensure the built-in Git extension is enabled.
+	- Check the Output channel "codex exec output" for errors.
 
 ## Usage
 
-1. Open a Git repository in VS Code.
 2. Run the command:
 	- "Commit message generation command execution" (`commit-mesasge-gene-by-codex.runCodexCmd`)
 	- You can find it from the Command Palette (Ctrl+Shift+P) by typing "Commit message generation".
