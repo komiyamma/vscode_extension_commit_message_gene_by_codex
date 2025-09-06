@@ -46,7 +46,7 @@ codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide
 codex exec "《prompt》" -m "gpt-5" -c model_reasoning_effort="minimal" -c hide_agent_reasoning="true" --dangerously-bypass-approvals-and-sandbox
 ```
 
-- The prompt asks Codex to output only the final commit message in Japanese and to wrap the full message between these exact marker lines.
+- The prompt asks Codex to output only the final commit message in English and to wrap the full message between these exact marker lines.
 - The extension reads standard output, extracts text between the markers, and writes it into the Git commit input box using the Git extension API (fallbacks to `scm.inputBox`).
 
 ## Privacy & Data
