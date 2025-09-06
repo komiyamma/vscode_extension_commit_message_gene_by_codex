@@ -44,7 +44,14 @@ export function activate(context: vscode.ExtensionContext) {
 	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
 	const codexDisposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.runCodexCmd', async () => {
 		const output = vscode.window.createOutputChannel('commit message gene');
-		output.show(true);
+		// 出力パネルは自動表示しない（必要なときだけ手動で開く）
+		// output.show(true);
+
+		// ステータスバーに実行中スピナーを表示
+		const statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
+		statusItem.text = '$(sync~spin) ★コミットメッセージを生成中★';
+		statusItem.tooltip = 'Commit Message を生成しています';
+		statusItem.show();
 		const proxyPath = path.join(__dirname, 'codex_proxy.exe');
 		const proc = spawn(proxyPath, ['utf8'], { cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath });
 		let buffer = '';
@@ -82,9 +89,13 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		proc.on('error', (err) => {
 			output.appendLine(`[codex_proxy.exe 実行エラー]: ${err.message}`);
+			statusItem.hide();
+			statusItem.dispose();
 		});
 		proc.on('close', async (code) => {
 			output.appendLine(`\n[codex_proxy.exe 終了: code ${code}]`);
+			statusItem.hide();
+			statusItem.dispose();
 			// 最終行に改行がなかった場合の残余をフラッシュ（必要なら）
 			if (stdoutRemainder && !containsMarker(stdoutRemainder)) {
 				output.appendLine(stdoutRemainder);

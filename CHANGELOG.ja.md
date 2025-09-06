@@ -1,4 +1,4 @@
-# 変更履歴
+# Change Log
 
 この拡張機能 "commit-mesasge-gene-by-codex" のすべての重要な変更はこのファイルに記録します。
 
