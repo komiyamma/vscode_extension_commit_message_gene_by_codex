@@ -1,6 +1,6 @@
 [To English Version README](README.md)
 
-[![Version](https://img.shields.io/badge/version-v0.1.6-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
+[![Version](https://img.shields.io/badge/version-v0.1.8-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
 
@@ -17,6 +17,16 @@
 - 生成結果を Git のコミット入力欄に自動で書き込み
   - 「Commit message generation by codex」(`commit-message-gene-by-codex.runCodexCmd`)
   - コマンドパレット (Ctrl+Shift+P) で「Commit message generation」と入力して検索できます
+
+## UI
+
+- ボタン（ソース管理ビュー）
+  - ソース管理ビューのタイトルバーとコミット入力欄の近くにボタンが追加されます。クリックすると「Commit message generation by codex」を実行します。
+  - Git プロバイダーが有効な場合に表示されます。  
+  [![Commit Input Box Button](images/button.png)](images/button.png)
+- ステータスバー表示
+  - 生成中はステータスバーにスピナー付きで「$(sync~spin) コミットメッセージを生成中…」が表示され、完了時に自動的に消えます。   
+  [![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
 
 ## 要件
 
@@ -40,14 +50,6 @@
    - コマンドパレット (Ctrl+Shift+P) で「Commit message generation」と入力して検索できます
 2. 実行中は出力パネルの「codex exec output」を確認します。
 3. 完了すると、生成メッセージはソース管理のコミットメッセージ入力欄に挿入されます。
-
-## UI
-
-- ボタン（ソース管理ビュー）
-  - ソース管理ビューのタイトルバーとコミット入力欄の近くにボタンが追加されます。クリックすると「Commit message generation by codex」を実行します。
-  - Git プロバイダーが有効な場合に表示されます。
-- ステータスバー表示
-  - 生成中はステータスバーにスピナー付きで「$(sync~spin) コミットメッセージを生成中…」が表示され、完了時に自動的に消えます。
 
 ## 仕組み
 

@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.8
+
+- Added UI images to readme.md
+
 ## 0.1.6
 
 - Add buttons to run the command in Source Control (commit input box toolbar and Source Control title bar)
