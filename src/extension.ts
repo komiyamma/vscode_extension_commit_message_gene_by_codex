@@ -1,0 +1,95 @@
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as vscode from 'vscode';
+import { spawn } from 'child_process';
+import * as path from 'path';
+
+// This method is called when your extension is activated
+// Your extension is activated the very first time the command is executed
+export function activate(context: vscode.ExtensionContext) {
+	// コミットメッセージ欄に安全に設定するヘルパー
+	async function setCommitMessage(message: string, output: vscode.OutputChannel) {
+	try {
+			// SCMビューをアクティブ化
+			await vscode.commands.executeCommand('workbench.view.scm');
+			// git拡張のAPIを取り出し（存在すれば）
+			const gitExt = vscode.extensions.getExtension('vscode.git');
+			if (gitExt) {
+		const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
+		// GitExtension 形式なら getAPI(1) で取得、既にAPIの場合はそのまま利用
+		const gitApi = typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
+		// 最初のリポジトリのinputBoxがあればそこに設定
+		const repos = (gitApi?.repositories ?? []) as any[];
+				if (repos.length > 0 && repos[0]?.inputBox) {
+					repos[0].inputBox.value = message;
+					output.appendLine('[コミットメッセージ欄に転写しました: git API]');
+					return;
+				}
+			}
+			// フォールバック: scm.inputBox
+			const scmAny = vscode.scm as any;
+			if (scmAny && scmAny.inputBox) {
+				scmAny.inputBox.value = message;
+				output.appendLine('[コミットメッセージ欄に転写しました: scm.inputBox]');
+				return;
+			}
+			output.appendLine('[警告] コミットメッセージ欄にアクセスできませんでした');
+		} catch (e: any) {
+			output.appendLine(`[エラー] コミットメッセージ設定に失敗: ${e?.message ?? e}`);
+		}
+	}
+
+	// Use the console to output diagnostic information (console.log) and errors (console.error)
+	// This line of code will only be executed once when your extension is activated
+	console.log('Congratulations, your extension "commit-mesasge-gene-by-codex" is now active!');
+
+	// The command has been defined in the package.json file
+	// 既存のHelloWorldコマンド
+	const disposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.helloWorld', () => {
+		vscode.window.showInformationMessage('Hello World from commit-mesasge-gene-by-codex!');
+	});
+	context.subscriptions.push(disposable);
+
+	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
+	const codexDisposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.runCodexCmd', async () => {
+		const output = vscode.window.createOutputChannel('codex exec output');
+		output.show(true);
+		const proxyPath = path.join(__dirname, 'codex_proxy.exe');
+		const proc = spawn(proxyPath, ['utf8'], { cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath });
+		let buffer = '';
+		proc.stdout.on('data', (data) => {
+			const text = data.toString('utf8');
+			output.append(text);
+			buffer += text;
+		});
+		proc.stderr.on('data', (data) => {
+			output.append(data.toString('utf8'));
+		});
+		proc.on('error', (err) => {
+			output.appendLine(`[codex_proxy.exe 実行エラー]: ${err.message}`);
+		});
+		proc.on('close', async (code) => {
+			output.appendLine(`\n[codex_proxy.exe 終了: code ${code}]`);
+			// ■★■★■～▲★▲★▲の間の行を抽出
+			const lines = buffer.split(/\r?\n/);
+			const isMarker = (line: string, marker: string) => line.replace(/\s/g, '') === marker;
+			const start = lines.findIndex(line => isMarker(line, '■★■★■'));
+			const end = lines.findIndex(line => isMarker(line, '▲★▲★▲'));
+			if (start !== -1 && end !== -1 && end > start + 1) {
+				const commitLines = lines.slice(start + 1, end);
+				const commitMsg = commitLines.join('\n');
+				const fs = require('fs');
+				const pathCommit = path.join(vscode.workspace.workspaceFolders?.[0].uri.fsPath || '', '.vscode-commit-message.txt');
+				fs.writeFileSync(pathCommit, commitMsg, { encoding: 'utf8' });
+									// コミットメッセージ欄へ設定（git API優先、フォールバックあり）
+									await setCommitMessage(commitMsg, output);
+				output.appendLine(`\n[コミットメッセージを .vscode-commit-message.txt に転写しました]`);
+				output.appendLine('ヒットしました');
+			}
+		});
+	});
+	context.subscriptions.push(codexDisposable);
+}
+
+// This method is called when your extension is deactivated
+export function deactivate() { }

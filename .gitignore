@@ -1,0 +1,46 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+# VSCode/Node/TypeScript
+.vscode/
+.env
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# C#/Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+*.exe
+*.dll
+*.pdb
+*.cache
+obj/
+bin/
+TestResults/
+*.app.config
+*.exe.config
+*.dbmdl
+*.bak
+*.backup
+*.swp
+_ReSharper*/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+.vs/
+# Rider
+.idea/
+*.sln.iml
