@@ -26,7 +26,7 @@ const M = {
 	},
 	codex: {
 		runError: (msg: string) => (isJapanese() ? `[codex_proxy.exe 実行エラー]: ${msg}` : `[codex_proxy.exe run error]: ${msg}`),
-		closed: (code: number|null) => (isJapanese() ? `\n[codex_proxy.exe 終了: code ${code}]` : `\n[codex_proxy.exe exited: code ${code}]`),
+		closed: (code: number | null) => (isJapanese() ? `\n[codex_proxy.exe 終了: code ${code}]` : `\n[codex_proxy.exe exited: code ${code}]`),
 	},
 };
 
@@ -35,17 +35,17 @@ const M = {
 export function activate(context: vscode.ExtensionContext) {
 	// コミットメッセージ欄に安全に設定するヘルパー
 	async function setCommitMessage(message: string, output: vscode.OutputChannel) {
-	try {
+		try {
 			// SCMビューをアクティブ化
 			await vscode.commands.executeCommand('workbench.view.scm');
 			// git拡張のAPIを取り出し（存在すれば）
 			const gitExt = vscode.extensions.getExtension('vscode.git');
 			if (gitExt) {
-		const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
-		// GitExtension 形式なら getAPI(1) で取得、既にAPIの場合はそのまま利用
-		const gitApi = typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
-		// 最初のリポジトリのinputBoxがあればそこに設定
-		const repos = (gitApi?.repositories ?? []) as any[];
+				const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
+				// GitExtension 形式なら getAPI(1) で取得、既にAPIの場合はそのまま利用
+				const gitApi = typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
+				// 最初のリポジトリのinputBoxがあればそこに設定
+				const repos = (gitApi?.repositories ?? []) as any[];
 				if (repos.length > 0 && repos[0]?.inputBox) {
 					repos[0].inputBox.value = message;
 					output.appendLine(M.commitArea.copiedGitApi());
@@ -64,8 +64,6 @@ export function activate(context: vscode.ExtensionContext) {
 			output.appendLine(M.commitArea.errorSet(e));
 		}
 	}
-
-	// （削除）起動時の挨拶ログと未使用の HelloWorld コマンド登録を整理しました
 
 	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
 	const codexDisposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
@@ -138,9 +136,9 @@ export function activate(context: vscode.ExtensionContext) {
 			if (start !== -1 && end !== -1 && end > start + 1) {
 				const commitLines = lines.slice(start + 1, end);
 				const commitMsg = commitLines.join('\n');
-									// コミットメッセージ欄へ設定（git API優先、フォールバックあり）
-									await setCommitMessage(commitMsg, output);
-					output.appendLine(M.commitArea.copiedDone());
+				// コミットメッセージ欄へ設定（git API優先、フォールバックあり）
+				await setCommitMessage(commitMsg, output);
+				output.appendLine(M.commitArea.copiedDone());
 			}
 		});
 	});
