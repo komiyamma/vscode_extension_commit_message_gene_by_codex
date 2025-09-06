@@ -43,24 +43,55 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
 	const codexDisposable = vscode.commands.registerCommand('commit-mesasge-gene-by-codex.runCodexCmd', async () => {
-		const output = vscode.window.createOutputChannel('codex exec output');
+		const output = vscode.window.createOutputChannel('commit message gene');
 		output.show(true);
 		const proxyPath = path.join(__dirname, 'codex_proxy.exe');
 		const proc = spawn(proxyPath, ['utf8'], { cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath });
 		let buffer = '';
+		// マーカー行を出力チャンネルに表示しないためのヘルパー
+		const containsMarker = (line: string) => {
+			const s = line.replace(/\s/g, '');
+			return s.includes('■★■★■') || s.includes('▲★▲★▲');
+		};
+		let stdoutRemainder = '';
+		let stderrRemainder = '';
 		proc.stdout.on('data', (data) => {
 			const text = data.toString('utf8');
-			output.append(text);
+			// 画面表示はマーカー行を隠す
+			const combined = stdoutRemainder + text;
+			const parts = combined.split(/\r?\n/);
+			stdoutRemainder = parts.pop() ?? '';
+			for (const line of parts) {
+				if (!containsMarker(line)) {
+					output.appendLine(line);
+				}
+			}
+			// commit 抽出用には生データを保持
 			buffer += text;
 		});
 		proc.stderr.on('data', (data) => {
-			output.append(data.toString('utf8'));
+			const text = data.toString('utf8');
+			const combined = stderrRemainder + text;
+			const parts = combined.split(/\r?\n/);
+			stderrRemainder = parts.pop() ?? '';
+			for (const line of parts) {
+				if (!containsMarker(line)) {
+					output.appendLine(line);
+				}
+			}
 		});
 		proc.on('error', (err) => {
 			output.appendLine(`[codex_proxy.exe 実行エラー]: ${err.message}`);
 		});
 		proc.on('close', async (code) => {
 			output.appendLine(`\n[codex_proxy.exe 終了: code ${code}]`);
+			// 最終行に改行がなかった場合の残余をフラッシュ（必要なら）
+			if (stdoutRemainder && !containsMarker(stdoutRemainder)) {
+				output.appendLine(stdoutRemainder);
+			}
+			if (stderrRemainder && !containsMarker(stderrRemainder)) {
+				output.appendLine(stderrRemainder);
+			}
 			// ■★■★■～▲★▲★▲の間の行を抽出
 			const lines = buffer.split(/\r?\n/);
 			const isMarker = (line: string, marker: string) => line.replace(/\s/g, '') === marker;
