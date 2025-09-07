@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.9
+
+- Readme.mdを簡潔にし、一新した
+
 ## 0.1.8
 
 - Readme.mdにUI画像を追加

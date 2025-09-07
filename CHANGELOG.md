@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.9
+
+- Readme.md has been made more concise and content has been redesigned.
+
 ## 0.1.8
 
 - Added UI images to readme.md
