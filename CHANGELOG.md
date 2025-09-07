@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.1
+
+- If the command is run again while a message is being generated, the previous generation is canceled.
+
 ## 0.1.9
 
 - Readme.md has been made more concise and content has been redesigned.
@@ -46,4 +50,3 @@
 - Generates Conventional Commits style messages by calling the local `codex` CLI through a small Windows helper (`codex_proxy.exe`).
 - Automatically inserts the generated message into the Source Control commit input box and saves it to `.vscode-commit-message.txt` at the root of the workspace.
 - Provides a "codex exec output" output channel for diagnostics.
-
