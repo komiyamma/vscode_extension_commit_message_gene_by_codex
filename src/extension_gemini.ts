@@ -24,9 +24,9 @@ const M = {
 		errorSet: (e: any) => (isJapanese() ? `[エラー] コミットメッセージ設定に失敗: ${e?.message ?? e}` : `[Error] Failed to set commit message: ${e?.message ?? e}`),
 		copiedDone: () => (isJapanese() ? '\n[コミットメッセージをコミット入力欄へ転写しました]' : '\n[Commit message pasted into input]'),
 	},
-	codex: {
-		runError: (msg: string) => (isJapanese() ? `[codex_proxy.exe 実行エラー]: ${msg}` : `[codex_proxy.exe run error]: ${msg}`),
-		closed: (code: number | null) => (isJapanese() ? `\n[codex_proxy.exe 終了: code ${code}]` : `\n[codex_proxy.exe exited: code ${code}]`),
+	gemini: {
+		runError: (msg: string) => (isJapanese() ? `[gemini_proxy.exe 実行エラー]: ${msg}` : `[gemini_proxy.exe run error]: ${msg}`),
+		closed: (code: number | null) => (isJapanese() ? `\n[gemini_proxy.exe 終了: code ${code}]` : `\n[gemini_proxy.exe exited: code ${code}]`),
 	},
 };
 
@@ -106,13 +106,13 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
-	const codexDisposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
+	// gemini_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
+	const geminiDisposable = vscode.commands.registerCommand('commit-message-gene-by-gemini-cli.runGeminiCLICmd', async () => {
 		const output = vscode.window.createOutputChannel(M.outputChannel());
 		// 出力パネルは自動表示しない（必要なときだけ手動で開く）
 		// output.show(true);
 
-		const proxyPath = path.join(__dirname, 'codex_proxy.exe');
+		const proxyPath = path.join(__dirname, 'gemini_proxy.exe');
 		const localeArg = isJapanese() ? 'ja' : 'en';
 		const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '<no-workspace>';
 
@@ -168,7 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 		proc.on('error', (err) => {
-			output.appendLine(M.codex.runError(err.message));
+			output.appendLine(M.gemini.runError(err.message));
 			// 最新の実行のみステータスバーを閉じる
 			const current = activeRuns.get(workspacePath);
 			if (current && current.runId === myRunId) {
@@ -178,7 +178,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 		proc.on('close', async (code) => {
-			output.appendLine(M.codex.closed(code));
+			output.appendLine(M.gemini.closed(code));
 			// 最新の実行でなければ結果・ステータス処理は破棄
 			const current = activeRuns.get(workspacePath);
 			if (!current || current.runId !== myRunId) {
@@ -209,7 +209,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 	});
-	context.subscriptions.push(codexDisposable);
+	context.subscriptions.push(geminiDisposable);
 }
 
 // This method is called when your extension is deactivated
