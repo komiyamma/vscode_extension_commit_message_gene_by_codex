@@ -15,7 +15,7 @@ const isJapanese = (): boolean => {
 const M = {
 	outputChannel: () => (isJapanese() ? 'commit message gene' : 'commit message gene'), // 固有名は共通
 	status: {
-		generating: () => (isJapanese() ? '$(sync~spin) ★コミットメッセージを生成中★' : '$(sync~spin) Generating commit message...'),
+		generating: () => (isJapanese() ? '$(sync~spin) $(sparkle-filled)コミットメッセージを生成中$(sparkle-filled)' : '$(sync~spin) Generating commit message...'),
 		generatingTip: () => (isJapanese() ? 'Commit Message を生成しています' : 'Generating commit message'),
 	},
 	commitArea: {
