@@ -27,7 +27,7 @@
       {
         "command": "commit-message-gene-by-codex.runCodexCmd",
         "title": "Commit message generation by codex",
-        "icon": "$(wand)"
+        "icon": "$(sparkle-filled)"
       }
     ],
     "menus": {
