@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { spawn, ChildProcess } from 'child_process';
 import * as path from 'path';
+import { provider } from './provider';
 
 // 言語判定: VS Code のUI言語が日本語(ja*)かどうか
 const isJapanese = (): boolean => {
@@ -23,11 +24,7 @@ const M = {
 		warnNoAccess: () => (isJapanese() ? '[警告] コミットメッセージ欄にアクセスできませんでした' : '[Warn] Could not access commit message box'),
 		errorSet: (e: any) => (isJapanese() ? `[エラー] コミットメッセージ設定に失敗: ${e?.message ?? e}` : `[Error] Failed to set commit message: ${e?.message ?? e}`),
 		copiedDone: () => (isJapanese() ? '\n[コミットメッセージをコミット入力欄へ転写しました]' : '\n[Commit message pasted into input]'),
-	},
-	codex: {
-		runError: (msg: string) => (isJapanese() ? `[codex_proxy.exe 実行エラー]: ${msg}` : `[codex_proxy.exe run error]: ${msg}`),
-		closed: (code: number | null) => (isJapanese() ? `\n[codex_proxy.exe 終了: code ${code}]` : `\n[codex_proxy.exe exited: code ${code}]`),
-	},
+    },
 };
 
 // This method is called when your extension is activated
@@ -106,15 +103,15 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	// codex_proxy.exeを直接呼び出し、utf8で標準出力・標準エラーをターミナルに順次出力するコマンド
-	const codexDisposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
-		const output = vscode.window.createOutputChannel(M.outputChannel());
-		// 出力パネルは自動表示しない（必要なときだけ手動で開く）
-		// output.show(true);
+    // 外部プロバイダーバイナリを呼び出し、utf8出力を処理するコマンド
+    const disposable = vscode.commands.registerCommand(provider.commandId, async () => {
+        const output = vscode.window.createOutputChannel(M.outputChannel());
+        // 出力パネルは自動表示しない（必要なときだけ手動で開く）
+        // output.show(true);
 
-		const proxyPath = path.join(__dirname, 'codex_proxy.exe');
-		const localeArg = isJapanese() ? 'ja' : 'en';
-		const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '<no-workspace>';
+        const proxyPath = path.join(__dirname, provider.binaryName);
+        const localeArg = isJapanese() ? 'ja' : 'en';
+        const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '<no-workspace>';
 
 		// 既存実行があればキャンセル。ステータスバーは再利用（重複表示を防止）
 		const prev = activeRuns.get(workspacePath);
@@ -167,23 +164,25 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			}
 		});
-		proc.on('error', (err) => {
-			output.appendLine(M.codex.runError(err.message));
-			// 最新の実行のみステータスバーを閉じる
-			const current = activeRuns.get(workspacePath);
-			if (current && current.runId === myRunId) {
-				current.statusItem.hide();
-				current.statusItem.dispose();
-				activeRuns.delete(workspacePath);
-			}
-		});
-		proc.on('close', async (code) => {
-			output.appendLine(M.codex.closed(code));
-			// 最新の実行でなければ結果・ステータス処理は破棄
-			const current = activeRuns.get(workspacePath);
-			if (!current || current.runId !== myRunId) {
-				return;
-			}
+        proc.on('error', (err) => {
+            const locale = (isJapanese() ? 'ja' : 'en') as 'ja' | 'en';
+            output.appendLine(provider.messages.runError(err.message, locale));
+            // 最新の実行のみステータスバーを閉じる
+            const current = activeRuns.get(workspacePath);
+            if (current && current.runId === myRunId) {
+                current.statusItem.hide();
+                current.statusItem.dispose();
+                activeRuns.delete(workspacePath);
+            }
+        });
+        proc.on('close', async (code) => {
+            const locale = (isJapanese() ? 'ja' : 'en') as 'ja' | 'en';
+            output.appendLine(provider.messages.closed(code, locale));
+            // 最新の実行でなければ結果・ステータス処理は破棄
+            const current = activeRuns.get(workspacePath);
+            if (!current || current.runId !== myRunId) {
+                return;
+            }
 			// 自分が最新なのでステータスを閉じて登録解除
 			current.statusItem.hide();
 			current.statusItem.dispose();
@@ -209,7 +208,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 	});
-	context.subscriptions.push(codexDisposable);
+    context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated
