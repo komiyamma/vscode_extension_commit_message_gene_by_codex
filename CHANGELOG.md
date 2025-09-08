@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.3
+
+- Timeout if no message is generated within 40 seconds.
+
 ## 0.2.2
 
 - Extracted Codex-dependent parts into separate files and unified the source between the Codex and Gemini CLI versions to improve maintainability.

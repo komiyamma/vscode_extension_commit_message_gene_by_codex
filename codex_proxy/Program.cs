@@ -2,11 +2,15 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 class Program
 {
     static int Main(string[] args)
     {
+        // 実行開始時刻を計測
+        var start = Stopwatch.StartNew();
+
         // 第1引数が"utf8"なら出力をUTF-8に設定（.NET Framework 4.8ではConsole.OutputEncodingのみ対応)
         if (args.Length > 0 && args[0] == "utf8")
         {
@@ -58,28 +62,65 @@ class Program
             CreateNoWindow = true
         };
 
+
+        // タイムアウトメッセージ（40秒経過時）
+        string timeoutMessage = lang == "en"
+            ? "No response from AI within 40 seconds. Forcing termination."
+            : "AIからの返答が無いため処理を強制終了します";
+
+        System.Threading.Timer killTimer = null;
+        Process process = null;
+
+
         try
         {
-            using (var process = Process.Start(psi))
+            process = Process.Start(psi);
+            if (process == null)
             {
-                if (process == null)
-                {
-                    Console.Error.WriteLine(lang == "en" ? "Could not start the process." : "プロセスを開始できませんでした。");
-                    return 1;
-                }
-
-                process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
-                process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-                return process.ExitCode;
+                Console.Error.WriteLine(lang == "en" ? "Could not start the process." : "プロセスを開始できませんでした。");
+                return 1;
             }
+
+            // 実行開始からの経過に応じて40秒までの残り時間でタイマー開始
+            int due = (int)Math.Max(0, 40000 - start.ElapsedMilliseconds);
+            killTimer = new Timer(_ =>
+            {
+                try
+                {
+                    Console.Error.WriteLine(timeoutMessage);
+                    try
+                    {
+                        if (process != null && !process.HasExited)
+                        {
+                            process.Kill();
+                        }
+                    }
+                    catch { /* 例外は無視 */ }
+                }
+                finally
+                {
+                    Environment.Exit(1);
+                }
+            }, null, due, Timeout.Infinite);
+
+            process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+            process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
+
+            // 正常終了時はタイマーを破棄
+            killTimer?.Dispose();
+            return process.ExitCode;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine((lang == "en" ? "Startup error: " : "起動時エラー: ") + ex.Message);
             return 1;
+        }
+        finally
+        {
+            killTimer?.Dispose();
         }
     }
 
