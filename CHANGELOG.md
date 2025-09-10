@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.4
+
+- Improved process shutdown handling when multiple comment generations are triggered concurrently.
+
 ## 0.2.3
 
 - Timeout if no message is generated within 40 seconds.
