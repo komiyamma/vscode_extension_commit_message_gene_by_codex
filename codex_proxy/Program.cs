@@ -7,7 +7,7 @@ using System.Threading;
 
 class Program
 {
-    // Windows Job オブジェクトを利用して、このプロセスが起動したプロセスツリー (gemini.cmd -> cmd.exe -> node.exe など) を
+    // Windows Job オブジェクトを利用して、このプロセスが起動したプロセスツリー (codex.cmd -> cmd.exe -> node.exe など) を
     // プログラム終了時にまとめて kill する。JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE を設定。
     private sealed class KillOnCloseJob : IDisposable
     {
