@@ -223,7 +223,7 @@ class Program
         string prompt = lang == "en" ? promptEn : promptJa;
 
         string safePrompt = prompt.Replace("\"", "'");
-        string arguments = $"exec \"{safePrompt}\" -m \"gpt-5\" -c model_reasoning_effort=\"minimal\" -c hide_agent_reasoning=\"true\" --dangerously-bypass-approvals-and-sandbox";
+        string arguments = $"exec \"{safePrompt}\" -m \"gpt-5-codex\" -c model_reasoning_effort=\"minimal\" -c hide_agent_reasoning=\"true\" --dangerously-bypass-approvals-and-sandbox";
 
         string cmdArguments = $"/c \"\"{codexPath}\" {arguments}\"";
         var psi = new ProcessStartInfo

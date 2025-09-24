@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.5
+
+- Switch the Codex helper to the `gpt-5-codex` model so commit message generation keeps working with the latest API.
+
 ## 0.2.4
 
 - Improved process shutdown handling when multiple comment generations are triggered concurrently.
