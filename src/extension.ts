@@ -1,11 +1,11 @@
-// The module 'vscode' contains the VS Code extensibility API
+// The module 'vscode' contains the VSCode extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { spawn, ChildProcess } from 'child_process';
 import * as path from 'path';
 import { provider } from './provider';
 
-// 言語判定: VS Code のUI言語が日本語(ja*)かどうか
+// 言語判定: VSCode のUI言語が日本語(ja*)かどうか
 const isJapanese = (): boolean => {
 	const lang = (vscode.env.language || '').toLowerCase();
 	return lang === 'ja' || lang.startsWith('ja-');
