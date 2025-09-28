@@ -6,7 +6,7 @@
 
 # コミットメッセージジェネレーター (by Codex)
 
-リポジトリの変更から Conventional Commits 形式のコミットメッセージを自動生成して、ソース管理の入力欄へ挿入する VS Code 拡張です。  
+リポジトリの変更から Conventional Commits 形式のコミットメッセージを自動生成して、ソース管理の入力欄へ挿入する VSCode 拡張です。  
 codexが動作する環境であれば、利用可能です。  
 GitHub Copilot が使えない環境でも手軽に使えます。
 
@@ -25,7 +25,7 @@ GitHub Copilot が使えない環境でも手軽に使えます。
 
 ## 要件
 
-- Windows 10/11 + VS Code の Git 拡張が有効であること
+- Windows 10/11 + VSCode の Git 拡張が有効であること
 - ソース管理ビュー（SCM）を開いていること
 - codex CLI をグローバルにインストールしてあり、`%APPDATA%\npm\codex.cmd` から実行できること  （ヘルパーはこの場所を探し `cmd.exe` 経由で起動します）
 

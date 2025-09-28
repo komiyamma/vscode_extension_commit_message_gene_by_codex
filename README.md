@@ -6,7 +6,7 @@
 
 # Commit Message Generator (by Codex)
 
-A VS Code extension that automatically generates a Conventional Commits-style commit message from your repository changes and inserts it into the Source Control input box.  
+VSCode extension that automatically generates a Conventional Commits-style commit message from your repository changes and inserts it into the Source Control input box.  
 It can be used in any environment where Codex runs.  
 It’s also handy in environments where GitHub Copilot is not available.
 
@@ -25,7 +25,7 @@ It’s also handy in environments where GitHub Copilot is not available.
 
 ## Requirements
 
-- Windows 10/11 with VS Code’s Git extension enabled
+- Windows 10/11 with VSCode’s Git extension enabled
 - Source Control (SCM) view is open
 - Codex CLI installed globally and runnable from `%APPDATA%\npm\codex.cmd` (the helper looks for it there and launches via `cmd.exe`)
 
