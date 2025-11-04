@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.1
+
+- Because the file size was too large, only major platform & CPU combinations were used.
+
 ## 0.3.0
 
 - Rebuilt commit message generation around the official `@openai/codex-sdk`, gathering repository Git context inside the extension so the separate `codex_proxy` helper is no longer required.
