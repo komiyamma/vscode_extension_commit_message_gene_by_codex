@@ -10,6 +10,12 @@ const MAX_SECTION_LENGTH = 3000;
 // Soft cap for git stdout when we stream output to avoid buffer exhaustion.
 const GIT_STDOUT_SOFT_LIMIT = 40000;
 
+type GitRepositoryLike = {
+	rootUri?: vscode.Uri;
+	inputBox?: { value: string };
+	ui?: { selected?: boolean };
+};
+
 const M = {
 	status: {
 		processing: () => (isJapanese() ? '$(sync~spin) Commit Message を生成しています...' : '$(sync~spin) Generating commit message...'),
@@ -84,7 +90,7 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel, w
 		// git拡張のAPIを取り出し（存在すれば）
 		const gitApi = await getGitApi();
 		if (gitApi) {
-			const repos = (gitApi.repositories ?? []) as any[];
+			const repos = (gitApi.repositories ?? []) as GitRepositoryLike[];
 			const targetRepo = selectRepositoryForCommit(repos, workspaceDir);
 			if (targetRepo?.inputBox) {
 				targetRepo.inputBox.value = message;
@@ -107,14 +113,13 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel, w
 }
 
 // Locate the repository whose commit input should be updated, prioritising context matches first.
-function selectRepositoryForCommit(repos: any[], workspaceDir?: string) {
+function selectRepositoryForCommit(repos: GitRepositoryLike[], workspaceDir?: string) {
 	if (!repos || repos.length === 0) {
 		return undefined;
 	}
 
 	if (workspaceDir) {
-		const normalized = normalizeFsPath(workspaceDir);
-		const byContext = repos.find(repo => repo?.rootUri?.fsPath && normalizeFsPath(repo.rootUri.fsPath) === normalized);
+		const byContext = findRepoByFsPath(repos, workspaceDir);
 		if (byContext) {
 			return byContext;
 		}
@@ -129,8 +134,7 @@ function selectRepositoryForCommit(repos: any[], workspaceDir?: string) {
 	if (activeEditor) {
 		const activeFolder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
 		if (activeFolder?.uri?.fsPath) {
-			const normalizedActive = normalizeFsPath(activeFolder.uri.fsPath);
-			const byActive = repos.find(repo => repo?.rootUri?.fsPath && normalizeFsPath(repo.rootUri.fsPath) === normalizedActive);
+			const byActive = findRepoByFsPath(repos, activeFolder.uri.fsPath);
 			if (byActive) {
 				return byActive;
 			}
@@ -144,6 +148,12 @@ function selectRepositoryForCommit(repos: any[], workspaceDir?: string) {
 function normalizeFsPath(fsPath: string): string {
 	const normalized = path.normalize(fsPath);
 	return process.platform === 'win32' ? normalized.toLowerCase() : normalized;
+}
+
+// Retrieve a repository whose root matches the provided filesystem path.
+function findRepoByFsPath(repos: GitRepositoryLike[], targetFsPath: string) {
+	const normalizedTarget = normalizeFsPath(targetFsPath);
+	return repos.find(repo => repo?.rootUri?.fsPath && normalizeFsPath(repo.rootUri.fsPath) === normalizedTarget);
 }
 // Report failure to both the output channel and a toast without touching SCM text.
 function reportError(message: string, output: vscode.OutputChannel) {
@@ -164,7 +174,7 @@ async function getGitApi(): Promise<any | undefined> {
 // Determine which repository Codex should treat as the working directory.
 async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	const gitApi = await getGitApi();
-	const repos = (gitApi?.repositories ?? []) as any[];
+		const repos = (gitApi?.repositories ?? []) as GitRepositoryLike[];
 	const selectedRepo = repos.find(repo => repo?.ui?.selected);
 	if (selectedRepo?.rootUri?.fsPath) {
 		return selectedRepo.rootUri.fsPath;
@@ -186,7 +196,6 @@ async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 }
 
-// Run a git subcommand and surface trimmed stdout or a descriptive error string.
 // Run a git subcommand and surface trimmed stdout or a descriptive error string.
 async function runGitCommand(args: string[], cwd: string, options?: { softLimit?: number }): Promise<string> {
 	if (options?.softLimit) {
