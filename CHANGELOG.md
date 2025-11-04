@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.2
+
+- Due to the large file size, this is only available for Windows.
+
 ## 0.3.1
 
 - Because the file size was too large, only major platform & CPU combinations were used.
