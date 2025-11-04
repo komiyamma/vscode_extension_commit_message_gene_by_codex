@@ -215,7 +215,7 @@ async function collectGitContext(cwd: string): Promise<string> {
 	const gitVersion = await runGitCommand(['--version'], cwd);
 	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd);
 	const branch = await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
-	const status = await runGitCommand(['status', '--short', '--branch', '--no-color'], cwd);
+	const status = await runGitCommand(['status', '--short', '--branch'], cwd);
 	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
 	let diffSectionTitle = 'Staged diff';
 	let diffBody = stagedDiff;
@@ -224,7 +224,7 @@ async function collectGitContext(cwd: string): Promise<string> {
 		diffBody = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
 	}
 	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd);
-	const recentCommits = await runGitCommand(['log', '--oneline', '-5', '--no-color'], cwd);
+	const recentCommits = await runGitCommand(['log', '--oneline', '-5'], cwd);
 
 	return [
 		formatSection('Git version', gitVersion),
