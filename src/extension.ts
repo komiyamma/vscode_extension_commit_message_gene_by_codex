@@ -15,6 +15,10 @@ const M = {
 		warnNoAccess: () => (isJapanese() ? 'コミットメッセージ欄にアクセスできませんでした。' : 'Unable to access commit message input.'),
 		errorSet: (e: string) => (isJapanese() ? `コミットメッセージの設定に失敗しました: ${e}` : `Failed to set commit message: ${e}`),
 	},
+	errors: {
+		noResult: () => (isJapanese() ? 'Codex から有効なコミットメッセージを受信できませんでした。' : 'No valid commit message was received from Codex.'),
+		failed: (e: string) => (isJapanese() ? `Codex の実行に失敗しました: ${e}` : `Failed to run Codex: ${e}`),
+	},
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -24,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
 		try {
-			const workspaceDir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+			const workspaceDir = await resolveWorkspaceDirectory();
 			if (!workspaceDir) {
 				vscode.window.showErrorMessage('No workspace folder is open, so Git context cannot be gathered.');
 				return;
@@ -52,11 +56,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (finalMessage) {
 				await setCommitMessage(finalMessage, output);
 			} else {
-				await setCommitMessage('No valid commit message was received from Codex.', output);
+				reportError(M.errors.noResult(), output);
 			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
-			await setCommitMessage(message, output);
+			reportError(M.errors.failed(message), output);
 		} finally {
 			statusSpinner.hide();
 			statusSpinner.text = '';
@@ -72,13 +76,10 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel) {
 		// SCMビューをアクティブ化
 		await vscode.commands.executeCommand('workbench.view.scm');
 		// git拡張のAPIを取り出し（存在すれば）
-		const gitExt = vscode.extensions.getExtension('vscode.git');
-		if (gitExt) {
-			const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
-			// GitExtension 形式なら getAPI(1) で取得、既にAPIの場合はそのまま利用
-			const gitApi = typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
+		const gitApi = await getGitApi();
+		if (gitApi) {
 			// 最初のリポジトリのinputBoxがあればそこに設定
-			const repos = (gitApi?.repositories ?? []) as any[];
+			const repos = (gitApi.repositories ?? []) as any[];
 			if (repos.length > 0 && repos[0]?.inputBox) {
 				repos[0].inputBox.value = message;
 				output.appendLine(M.commitArea.copiedGitApi());
@@ -99,6 +100,44 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel) {
 	}
 }
 
+function reportError(message: string, output: vscode.OutputChannel) {
+	output.appendLine(message);
+	vscode.window.showErrorMessage(message);
+}
+
+async function getGitApi(): Promise<any | undefined> {
+	const gitExt = vscode.extensions.getExtension('vscode.git');
+	if (!gitExt) {
+		return undefined;
+	}
+	const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
+	return typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
+}
+
+async function resolveWorkspaceDirectory(): Promise<string | undefined> {
+	const gitApi = await getGitApi();
+	const repos = (gitApi?.repositories ?? []) as any[];
+	const selectedRepo = repos.find(repo => repo?.ui?.selected);
+	if (selectedRepo?.rootUri?.fsPath) {
+		return selectedRepo.rootUri.fsPath;
+	}
+
+	const activeEditor = vscode.window.activeTextEditor;
+	if (activeEditor) {
+		// アクティブエディターのファイルが属するフォルダーを優先する
+		const containingWorkspace = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
+		if (containingWorkspace?.uri?.fsPath) {
+			return containingWorkspace.uri.fsPath;
+		}
+	}
+
+	if (repos.length > 0 && repos[0]?.rootUri?.fsPath) {
+		return repos[0].rootUri.fsPath;
+	}
+
+	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+}
+
 async function runGitCommand(args: string[], cwd: string): Promise<string> {
 	try {
 		const { stdout } = await execFileAsync('git', args, { cwd, maxBuffer: 1024 * 1024 * 20 });
@@ -113,11 +152,11 @@ async function collectGitContext(cwd: string): Promise<string> {
 	const gitVersion = await runGitCommand(['--version'], cwd);
 	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd);
 	const branch = await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
-	const status = await runGitCommand(['status', '--short', '--branch'], cwd);
-	const stagedDiff = await runGitCommand(['diff', '--cached'], cwd);
-	const unstagedDiff = await runGitCommand(['diff'], cwd);
+	const status = await runGitCommand(['status', '--short', '--branch', '--no-color'], cwd);
+	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd);
+	const unstagedDiff = await runGitCommand(['diff', '--color=never'], cwd);
 	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd);
-	const recentCommits = await runGitCommand(['log', '--oneline', '-5'], cwd);
+	const recentCommits = await runGitCommand(['log', '--oneline', '-5', '--no-color'], cwd);
 
 	return [
 		formatSection('Git version', gitVersion),
