@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { execFile } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import { promisify } from 'util';
 import * as path from 'path';
 
@@ -7,6 +7,8 @@ import * as path from 'path';
 const execFileAsync = promisify(execFile);
 // Upper bound for each collected git section to keep prompts within Codex limits.
 const MAX_SECTION_LENGTH = 3000;
+// Soft cap for git stdout when we stream output to avoid buffer exhaustion.
+const GIT_STDOUT_SOFT_LIMIT = 40000;
 
 const M = {
 	status: {
@@ -185,7 +187,11 @@ async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 }
 
 // Run a git subcommand and surface trimmed stdout or a descriptive error string.
-async function runGitCommand(args: string[], cwd: string): Promise<string> {
+// Run a git subcommand and surface trimmed stdout or a descriptive error string.
+async function runGitCommand(args: string[], cwd: string, options?: { softLimit?: number }): Promise<string> {
+	if (options?.softLimit) {
+		return runGitCommandWithSoftLimit(args, cwd, options.softLimit);
+	}
 	try {
 		const { stdout } = await execFileAsync('git', args, { cwd, maxBuffer: 1024 * 1024 * 20 });
 		return stdout.trim();
@@ -201,8 +207,8 @@ async function collectGitContext(cwd: string): Promise<string> {
 	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd);
 	const branch = await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
 	const status = await runGitCommand(['status', '--short', '--branch', '--no-color'], cwd);
-	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd);
-	const unstagedDiff = await runGitCommand(['diff', '--color=never'], cwd);
+	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
+	const unstagedDiff = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
 	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd);
 	const recentCommits = await runGitCommand(['log', '--oneline', '-5', '--no-color'], cwd);
 
@@ -257,5 +263,67 @@ function buildPrompt(gitContext: string): string {
 		'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。',
 		'最終的なコミットメッセージ案のみを返してください。'
 	].join('\n\n');
+}
+
+// Stream git stdout while enforcing a soft character limit to prevent buffer overruns.
+async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: number): Promise<string> {
+	return new Promise(resolve => {
+		const child = spawn('git', args, { cwd });
+		let stdout = '';
+		let stderr = '';
+		let truncated = false;
+		let settled = false;
+
+		const finish = (value: string) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			resolve(value);
+		};
+
+		const appendStdout = (chunk: Buffer | string) => {
+			if (truncated) {
+				return;
+			}
+			const text = chunk.toString();
+			if (stdout.length + text.length > limit) {
+				const remaining = Math.max(limit - stdout.length, 0);
+				if (remaining > 0) {
+					stdout += text.slice(0, remaining);
+				}
+				truncated = true;
+				child.kill('SIGTERM');
+			} else {
+				stdout += text;
+			}
+		};
+
+		child.stdout.on('data', appendStdout);
+		child.stderr.on('data', chunk => {
+			if (!truncated) {
+				stderr += chunk.toString();
+			}
+		});
+
+		child.on('error', err => {
+			finish(`Failed to run git ${args.join(' ')}: ${err.message}`);
+		});
+
+		child.on('close', (code, signal) => {
+			if (truncated) {
+				const suffix = `\n... (truncated to ${limit} chars)`;
+				finish(`${stdout.trim()}${suffix}`.trim());
+				return;
+			}
+			if (code === 0) {
+				finish(stdout.trim());
+				return;
+			}
+			const signalInfo = signal ? ` signal ${signal}` : '';
+			const message = stderr.trim() || `exit code ${code ?? 'unknown'}${signalInfo}`;
+			finish(`Failed to run git ${args.join(' ')}: ${message}`);
+		});
+	});
 }
 
