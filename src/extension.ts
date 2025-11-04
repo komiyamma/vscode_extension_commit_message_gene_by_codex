@@ -210,11 +210,29 @@ async function runGitCommand(args: string[], cwd: string, options?: { softLimit?
 	}
 }
 
+function isHeadMissingError(message: string): boolean {
+	return /ambiguous argument 'HEAD'/i.test(message) || /unknown revision/i.test(message) || /does not have any commits yet/i.test(message);
+}
+
+function toErrorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
+}
+
 // Gather the git facts Codex needs to craft a conventional commit message.
 async function collectGitContext(cwd: string): Promise<string> {
 	const gitVersion = await runGitCommand(['--version'], cwd);
 	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd);
-	const branch = await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+	const branch = await (async () => {
+		try {
+			return await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+		} catch (error) {
+			const message = toErrorMessage(error);
+			if (isHeadMissingError(message)) {
+				return 'No commits yet (HEAD not created)';
+			}
+			throw error;
+		}
+	})();
 	const status = await runGitCommand(['status', '--short', '--branch'], cwd);
 	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
 	let diffSectionTitle = 'Staged diff';
@@ -224,7 +242,17 @@ async function collectGitContext(cwd: string): Promise<string> {
 		diffBody = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
 	}
 	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd);
-	const recentCommits = await runGitCommand(['log', '--oneline', '-5'], cwd);
+	const recentCommits = await (async () => {
+		try {
+			return await runGitCommand(['log', '--oneline', '-5'], cwd);
+		} catch (error) {
+			const message = toErrorMessage(error);
+			if (isHeadMissingError(message)) {
+				return 'No commits yet';
+			}
+			throw error;
+		}
+	})();
 
 	return [
 		formatSection('Git version', gitVersion),
