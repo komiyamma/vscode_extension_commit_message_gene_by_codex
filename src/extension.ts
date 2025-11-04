@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import * as path from 'path';
 
+// Promisified wrapper for spawning git commands without direct callback usage.
 const execFileAsync = promisify(execFile);
+// Upper bound for each collected git section to keep prompts within Codex limits.
 const MAX_SECTION_LENGTH = 3000;
 
 const M = {
@@ -26,6 +29,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const statusSpinner = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
 	context.subscriptions.push(output, statusSpinner);
 
+	// Register the command that gathers git context, queries Codex, and updates the SCM input.
 	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
 		try {
 			const workspaceDir = await resolveWorkspaceDirectory();
@@ -54,7 +58,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const result = await thread.run(prompt);
 			const finalMessage = result.finalResponse?.trim();
 			if (finalMessage) {
-				await setCommitMessage(finalMessage, output);
+				await setCommitMessage(finalMessage, output, workspaceDir);
 			} else {
 				reportError(M.errors.noResult(), output);
 			}
@@ -70,18 +74,18 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 }
 
-// コミットメッセージ欄に安全に設定するヘルパー
-async function setCommitMessage(message: string, output: vscode.OutputChannel) {
+// Safely copy the generated message into the most relevant SCM commit input.
+async function setCommitMessage(message: string, output: vscode.OutputChannel, workspaceDir?: string) {
 	try {
 		// SCMビューをアクティブ化
 		await vscode.commands.executeCommand('workbench.view.scm');
 		// git拡張のAPIを取り出し（存在すれば）
 		const gitApi = await getGitApi();
 		if (gitApi) {
-			// 最初のリポジトリのinputBoxがあればそこに設定
 			const repos = (gitApi.repositories ?? []) as any[];
-			if (repos.length > 0 && repos[0]?.inputBox) {
-				repos[0].inputBox.value = message;
+			const targetRepo = selectRepositoryForCommit(repos, workspaceDir);
+			if (targetRepo?.inputBox) {
+				targetRepo.inputBox.value = message;
 				output.appendLine(M.commitArea.copiedGitApi());
 				return;
 			}
@@ -100,11 +104,52 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel) {
 	}
 }
 
+// Locate the repository whose commit input should be updated, prioritising context matches first.
+function selectRepositoryForCommit(repos: any[], workspaceDir?: string) {
+	if (!repos || repos.length === 0) {
+		return undefined;
+	}
+
+	if (workspaceDir) {
+		const normalized = normalizeFsPath(workspaceDir);
+		const byContext = repos.find(repo => repo?.rootUri?.fsPath && normalizeFsPath(repo.rootUri.fsPath) === normalized);
+		if (byContext) {
+			return byContext;
+		}
+	}
+
+	const selected = repos.find(repo => repo?.ui?.selected);
+	if (selected) {
+		return selected;
+	}
+
+	const activeEditor = vscode.window.activeTextEditor;
+	if (activeEditor) {
+		const activeFolder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
+		if (activeFolder?.uri?.fsPath) {
+			const normalizedActive = normalizeFsPath(activeFolder.uri.fsPath);
+			const byActive = repos.find(repo => repo?.rootUri?.fsPath && normalizeFsPath(repo.rootUri.fsPath) === normalizedActive);
+			if (byActive) {
+				return byActive;
+			}
+		}
+	}
+
+	return repos[0];
+}
+
+// Prepare filesystem paths for reliable equality checks across platforms.
+function normalizeFsPath(fsPath: string): string {
+	const normalized = path.normalize(fsPath);
+	return process.platform === 'win32' ? normalized.toLowerCase() : normalized;
+}
+// Report failure to both the output channel and a toast without touching SCM text.
 function reportError(message: string, output: vscode.OutputChannel) {
 	output.appendLine(message);
 	vscode.window.showErrorMessage(message);
 }
 
+// Fetch and return the Git extension API, activating the extension lazily if needed.
 async function getGitApi(): Promise<any | undefined> {
 	const gitExt = vscode.extensions.getExtension('vscode.git');
 	if (!gitExt) {
@@ -114,6 +159,7 @@ async function getGitApi(): Promise<any | undefined> {
 	return typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
 }
 
+// Determine which repository Codex should treat as the working directory.
 async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	const gitApi = await getGitApi();
 	const repos = (gitApi?.repositories ?? []) as any[];
@@ -138,6 +184,7 @@ async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 }
 
+// Run a git subcommand and surface trimmed stdout or a descriptive error string.
 async function runGitCommand(args: string[], cwd: string): Promise<string> {
 	try {
 		const { stdout } = await execFileAsync('git', args, { cwd, maxBuffer: 1024 * 1024 * 20 });
@@ -148,6 +195,7 @@ async function runGitCommand(args: string[], cwd: string): Promise<string> {
 	}
 }
 
+// Gather the git facts Codex needs to craft a conventional commit message.
 async function collectGitContext(cwd: string): Promise<string> {
 	const gitVersion = await runGitCommand(['--version'], cwd);
 	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd);
@@ -170,11 +218,13 @@ async function collectGitContext(cwd: string): Promise<string> {
 	].join('\n\n');
 }
 
+// Wrap a single git data section in markdown and ensure bounded length.
 function formatSection(title: string, body: string): string {
 	const safeBody = truncateForPrompt(body || 'N/A', MAX_SECTION_LENGTH);
 	return `### ${title}\n${safeBody}`;
 }
 
+// Apply a hard cap to command output so the prompt remains digestible.
 function truncateForPrompt(text: string, limit: number): string {
 	if (text.length <= limit) {
 		return text;
@@ -188,6 +238,7 @@ function isJapanese(): boolean {
 	return lang === 'ja' || lang.startsWith('ja-');
 }
 
+// Craft the instruction set for Codex, switching language based on UI locale.
 function buildPrompt(gitContext: string): string {
 	if (!isJapanese()) {
 		return [
