@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.5
+
+- Eliminated specification of specific AI models.
+
 ## 0.3.4
 
 - Improved commit message generation error handling so failures in Codex or invalid messages surface clear guidance.
