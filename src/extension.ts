@@ -196,7 +196,7 @@ async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 }
 
-// Run a git subcommand and surface trimmed stdout or a descriptive error string.
+// Run a git subcommand and return trimmed stdout or throw a descriptive error.
 async function runGitCommand(args: string[], cwd: string, options?: { softLimit?: number }): Promise<string> {
 	if (options?.softLimit) {
 		return runGitCommandWithSoftLimit(args, cwd, options.softLimit);
@@ -206,7 +206,7 @@ async function runGitCommand(args: string[], cwd: string, options?: { softLimit?
 		return stdout.trim();
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		return `Failed to run git ${args.join(' ')}: ${message}`;
+		throw new Error(`Failed to run git ${args.join(' ')}: ${message}`);
 	}
 }
 
@@ -217,7 +217,12 @@ async function collectGitContext(cwd: string): Promise<string> {
 	const branch = await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
 	const status = await runGitCommand(['status', '--short', '--branch', '--no-color'], cwd);
 	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
-	const unstagedDiff = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
+	let diffSectionTitle = 'Staged diff';
+	let diffBody = stagedDiff;
+	if (!diffBody) {
+		diffSectionTitle = 'Working tree diff (no staged changes)';
+		diffBody = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
+	}
 	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd);
 	const recentCommits = await runGitCommand(['log', '--oneline', '-5', '--no-color'], cwd);
 
@@ -226,8 +231,7 @@ async function collectGitContext(cwd: string): Promise<string> {
 		formatSection('Repository root', repoRoot),
 		formatSection('Current branch', branch),
 		formatSection('Status (--short --branch)', status),
-		formatSection('Staged diff', stagedDiff),
-		formatSection('Unstaged diff', unstagedDiff),
+		formatSection(diffSectionTitle, diffBody),
 		formatSection('Untracked files', untrackedFiles),
 		formatSection('Recent commits', recentCommits),
 	].join('\n\n');
@@ -276,19 +280,27 @@ function buildPrompt(gitContext: string): string {
 
 // Stream git stdout while enforcing a soft character limit to prevent buffer overruns.
 async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: number): Promise<string> {
-	return new Promise(resolve => {
+	return new Promise((resolve, reject) => {
 		const child = spawn('git', args, { cwd });
 		let stdout = '';
 		let stderr = '';
 		let truncated = false;
 		let settled = false;
 
-		const finish = (value: string) => {
+		const finishSuccess = (value: string) => {
 			if (settled) {
 				return;
 			}
 			settled = true;
 			resolve(value);
+		};
+
+		const finishFailure = (error: Error) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			reject(error);
 		};
 
 		const appendStdout = (chunk: Buffer | string) => {
@@ -316,23 +328,23 @@ async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: nu
 		});
 
 		child.on('error', err => {
-			finish(`Failed to run git ${args.join(' ')}: ${err.message}`);
+			const message = err instanceof Error ? err.message : String(err);
+			finishFailure(new Error(`Failed to run git ${args.join(' ')}: ${message}`));
 		});
 
 		child.on('close', (code, signal) => {
 			if (truncated) {
 				const suffix = `\n... (truncated to ${limit} chars)`;
-				finish(`${stdout.trim()}${suffix}`.trim());
+				finishSuccess(`${stdout.trim()}${suffix}`.trim());
 				return;
 			}
 			if (code === 0) {
-				finish(stdout.trim());
+				finishSuccess(stdout.trim());
 				return;
 			}
 			const signalInfo = signal ? ` signal ${signal}` : '';
 			const message = stderr.trim() || `exit code ${code ?? 'unknown'}${signalInfo}`;
-			finish(`Failed to run git ${args.join(' ')}: ${message}`);
+			finishFailure(new Error(`Failed to run git ${args.join(' ')}: ${message}`));
 		});
 	});
 }
-
