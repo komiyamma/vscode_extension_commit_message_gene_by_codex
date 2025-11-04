@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.3.4
+
+- Improved commit message generation error handling so failures in Codex or invalid messages surface clear guidance.
+- Added smarter repository selection that respects the active workspace when choosing where to insert the commit message.
+- Applied soft output limits and richer error reporting to Git commands to prevent buffer overrun issues.
+
 ## 0.3.3
 
 - Listed under the "SCM Providers" category in the Marketplace so the extension is easier to find.
