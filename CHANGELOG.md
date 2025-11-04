@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.3.0
+
+- Rebuilt commit message generation around the official `@openai/codex-sdk`, gathering repository Git context inside the extension so the separate `codex_proxy` helper is no longer required.
+- This is the first step towards making it work not only on Windows, but also on MacOS and Linux.
+
+
 ## 0.2.5
 
 - Switch the Codex helper to the `gpt-5-codex` model so commit message generation keeps working with the latest API.
