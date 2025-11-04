@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.3
+
+- Listed under the "SCM Providers" category in the Marketplace so the extension is easier to find.
+
 ## 0.3.2
 
 - Due to the large file size, this is only available for Windows.
