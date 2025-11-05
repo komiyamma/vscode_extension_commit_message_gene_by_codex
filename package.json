@@ -45,6 +45,37 @@
           "when": "scmProvider == git"
         }
       ]
+    },
+    "configuration": {
+      "title": "Commit Message Gene by Codex",
+      "properties": {
+        "commitMessageGene.prompt.intro.en": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "English instructions shown to Codex before the Git context. Each array item becomes a paragraph with a blank line between entries.",
+          "default": [
+            "You are an assistant that drafts commit messages using the provided Git information.",
+            "All required Git data has already been collected below. Do not run additional git commands.",
+            "Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English.",
+            "Return only the final commit message proposal."
+          ]
+        },
+        "commitMessageGene.prompt.intro.ja": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "Japanese instructions shown to Codex before the Git context. Each array item becomes a paragraph with a blank line between entries.",
+          "default": [
+            "あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。",
+            "必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。",
+            "サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。",
+            "最終的なコミットメッセージ案だけを返してください。"
+          ]
+        }
+      }
     }
   },
   "scripts": {

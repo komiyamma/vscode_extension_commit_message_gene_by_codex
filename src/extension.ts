@@ -285,26 +285,35 @@ function isJapanese(): boolean {
 }
 
 // Craft the instruction set for Codex, switching language based on UI locale.
+const DEFAULT_INTRO_EN = [
+	'You are an assistant that drafts commit messages using the provided Git information.',
+	'All required Git data has already been collected below. Do not run additional git commands.',
+	'Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English.',
+	'Return only the final commit message proposal.'
+];
+
+const DEFAULT_INTRO_JA = [
+	'あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。',
+	'必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。',
+	'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。',
+	'最終的なコミットメッセージ案だけを返してください。'
+];
+
 function buildPrompt(gitContext: string): string {
-	if (!isJapanese()) {
-		return [
-			'You are an assistant that drafts commit messages using the provided Git information.',
-			'All required Git data has already been collected below. Do not run additional git commands.',
-			gitContext,
-			'Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English.',
-			'Return only the final commit message proposal.'
-		].join('\n\n');
-	}
+	const config = vscode.workspace.getConfiguration();
+	const japanese = isJapanese();
+	const configKey = japanese ? 'commitMessageGene.prompt.intro.ja' : 'commitMessageGene.prompt.intro.en';
+	const defaultIntro = japanese ? DEFAULT_INTRO_JA : DEFAULT_INTRO_EN;
+	const configuredIntro = config.get<string[]>(configKey);
+	const resolvedIntro = Array.isArray(configuredIntro)
+		? configuredIntro
+			.map((line) => (typeof line === 'string' ? line.trim() : ''))
+			.filter((line) => line.length > 0)
+		: [];
+	const introLines = resolvedIntro.length > 0 ? resolvedIntro : defaultIntro;
 
-	return [
-		'あなたは提供されたGit情報を使ってコミットメッセージを作成するアシスタントです。',
-		'必要なGitデータはすべて以下に収集済みです。追加のgitコマンドを実行しないでください。',
-		gitContext,
-		'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。',
-		'最終的なコミットメッセージ案のみを返してください。'
-	].join('\n\n');
+	return [...introLines, gitContext].join('\n\n');
 }
-
 // Stream git stdout while enforcing a soft character limit to prevent buffer overruns.
 async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: number): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -375,3 +384,4 @@ async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: nu
 		});
 	});
 }
+
