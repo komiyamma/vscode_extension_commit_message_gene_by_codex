@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.6
+
+- Added configuration settings so the English and Japanese Codex intro prompts can be customized from VS Code.
+- Updated the prompt builder to read the configured paragraphs, trim blank lines, and fall back to the bundled defaults when unset.
+
 ## 0.3.5
 
 - Eliminated specification of specific AI models.
