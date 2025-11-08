@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.7
+
+- Explicitly pin Codex threads to the `gpt5-codex-mini` model.
+
 ## 0.3.6
 
 - Added configuration settings so the English and Japanese Codex intro prompts can be customized from VS Code.
