@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.9
+
+- Codexスレッドで利用するモデル名を `gpt-5.1-codex-mini` に更新し、AI Modelの変更に追従しました。
+- `@openai/codex-sdk` を 0.58.0 に引き上げ、最新SDKとの互換性を維持しました。
+
 ## 0.3.7
 
 - Codex スレッドで使用するモデルを `gpt5-codex-mini` に固定した。

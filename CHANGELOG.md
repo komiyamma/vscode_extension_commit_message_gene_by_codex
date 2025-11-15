@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.9
+
+- Update Codex threads to the `gpt-5.1-codex-mini` model so message generation keeps working with the renamed AI Model.
+- Upgrade to `@openai/codex-sdk` 0.58.0 to stay compatible with the latest SDK release.
+
 ## 0.3.7
 
 - Explicitly pin Codex threads to the `gpt5-codex-mini` model.

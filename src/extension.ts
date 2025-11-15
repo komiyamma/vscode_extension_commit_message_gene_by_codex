@@ -55,7 +55,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const { Codex } = await import('@openai/codex-sdk');
 			const codex = new Codex();
 			const thread = codex.startThread({
-				model: 'gpt-5-codex-mini',
+				model: 'gpt-5.1-codex-mini',
 				workingDirectory: workspaceDir,
 				skipGitRepoCheck: true,
 			});
