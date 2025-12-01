@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- Added macOS-specific activation that patches PATH for common Homebrew locations and validates `git`, letting commit message generation run inside macOS VS Code sandboxes.
+
 ## 0.3.9
 
 - Update Codex threads to the `gpt-5.1-codex-mini` model so message generation keeps working with the renamed AI Model.
