@@ -77,10 +77,6 @@ export async function activateDefault(context: vscode.ExtensionContext): Promise
 	context.subscriptions.push(disposable);
 }
 
-// ----------------------------------------------------
-// ALL OTHER FUNCTIONS — EXACT ORIGINAL CODE BELOW
-// ----------------------------------------------------
-
 async function setCommitMessage(message: string, output: vscode.OutputChannel, workspaceDir?: string) {
 	try {
 		await vscode.commands.executeCommand('workbench.view.scm');
