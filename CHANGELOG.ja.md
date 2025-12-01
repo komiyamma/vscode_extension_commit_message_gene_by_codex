@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- macOS 用のアダプタを追加し、Homebrew パスを PATH に補正して `git` を検出できるようにし、macOS 版 VS Code のサンドボックスでもコミットメッセージ生成が動作するようにしました。
+
 ## 0.3.9
 
 - Codexスレッドで利用するモデル名を `gpt-5.1-codex-mini` に更新し、AI Modelの変更に追従しました。
@@ -107,4 +111,3 @@
 - 小さな Windows ヘルパー (`codex_proxy.exe`) を介してローカルの `codex` CLI を呼び出し、Conventional Commits 形式のメッセージを生成。
 - 生成メッセージをソース管理のコミット入力欄へ自動挿入し、ワークスペース直下の `.vscode-commit-message.txt` に保存。
 - 診断用に "codex exec output" 出力チャンネルを提供。
-

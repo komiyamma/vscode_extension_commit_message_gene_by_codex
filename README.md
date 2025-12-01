@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-v0.3.9-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
+![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white) ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-000000.svg?logo=apple&logoColor=white)
 
 # Commit Message Generator (by Codex)
 
@@ -25,9 +25,11 @@ It’s also handy in environments where GitHub Copilot is not available.
 
 ## Requirements
 
-- Windows 10/11 with VSCode’s Git extension enabled
+- Windows 10/11 or macOS (Git extension enabled in VSCode)
 - Source Control (SCM) view is open
-- Codex CLI installed globally and runnable from `%APPDATA%\npm\codex.cmd` (the helper looks for it there and launches via `cmd.exe`)
+- Codex CLI installed globally and reachable on your PATH  
+  - Windows: `%APPDATA%\npm\codex.cmd` (launched via `cmd.exe`)  
+  - macOS: Homebrew installs under `/opt/homebrew/bin` (Apple Silicon) or `/usr/local/bin` (Intel); the extension patches PATH to include these so VSCode can find `codex` and `git`
 
 ## Notes
 
@@ -36,4 +38,3 @@ It’s also handy in environments where GitHub Copilot is not available.
 ## License
 
 MIT License © 2025 komiyamma
-

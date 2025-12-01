@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-v0.3.9-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
+![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white) ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-000000.svg?logo=apple&logoColor=white)
 
 # コミットメッセージジェネレーター (by Codex)
 
@@ -25,9 +25,11 @@ GitHub Copilot が使えない環境でも手軽に使えます。
 
 ## 要件
 
-- Windows 10/11 + VSCode の Git 拡張が有効であること
+- Windows 10/11 または macOS（VSCode の Git 拡張が有効であること）
 - ソース管理ビュー（SCM）を開いていること
-- codex CLI をグローバルにインストールしてあり、`%APPDATA%\npm\codex.cmd` から実行できること  （ヘルパーはこの場所を探し `cmd.exe` 経由で起動します）
+- codex CLI をグローバルにインストールしてあり、PATH から実行できること  
+  - Windows: `%APPDATA%\npm\codex.cmd` を `cmd.exe` 経由で起動します  
+  - macOS: Homebrew の場合、Apple Silicon は `/opt/homebrew/bin`、Intel は `/usr/local/bin` に入ります。拡張が PATH を補正し、VSCode から `codex` と `git` を見つけられるようにします
 
 ## その他
 
