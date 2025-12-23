@@ -64,8 +64,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			const prompt = buildPrompt(gitContext);
 			const result = await thread.run(prompt);
-			const finalMessage = result.finalResponse?.trim();
+
+			let finalMessage = result.finalResponse?.trim();
+
 			if (finalMessage) {
+				// finalMessageの先頭と末尾の両方に「`」が付いてるなら、先頭と末尾の「`」を削除する
+				if (finalMessage.startsWith('`') && finalMessage.endsWith('`')) {
+					finalMessage = finalMessage.slice(1, -1);
+				}
+
 				await setCommitMessage(finalMessage, output, workspaceDir);
 			} else {
 				reportError(M.errors.noResult(), output);
@@ -174,7 +181,7 @@ async function getGitApi(): Promise<any | undefined> {
 // Determine which repository Codex should treat as the working directory.
 async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	const gitApi = await getGitApi();
-		const repos = (gitApi?.repositories ?? []) as GitRepositoryLike[];
+	const repos = (gitApi?.repositories ?? []) as GitRepositoryLike[];
 	const selectedRepo = repos.find(repo => repo?.ui?.selected);
 	if (selectedRepo?.rootUri?.fsPath) {
 		return selectedRepo.rootUri.fsPath;
