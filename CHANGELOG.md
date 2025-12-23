@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.10
+
+- Removed leading and trailing backticks from the generated commit message if present.
+
 ## 0.3.9
 
 - Update Codex threads to the `gpt-5.1-codex-mini` model so message generation keeps working with the renamed AI Model.
