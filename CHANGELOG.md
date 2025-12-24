@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.11
+
+- Adjusted commit message cleaning logic to trim whitespace inside backticks when removing them.
+
 ## 0.3.10
 
 - Removed leading and trailing backticks from the generated commit message if present.
