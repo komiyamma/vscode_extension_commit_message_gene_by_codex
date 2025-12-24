@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.12
+
+- Strip surrounding bold markers when the generated commit message is wrapped in `**`.
+
 ## 0.3.11
 
 - Adjusted commit message cleaning logic to trim whitespace inside backticks when removing them.
