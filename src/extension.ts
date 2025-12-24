@@ -77,6 +77,11 @@ export async function activate(context: vscode.ExtensionContext) {
 					finalMessage = finalMessage.slice(1, -1).trim();
 				}
 
+				// finalMessageの先頭と末尾の両方に「**」が付いてるなら、先頭と末尾の「**」を削除する
+				else if (finalMessage.startsWith('**') && finalMessage.endsWith('**')) {
+					finalMessage = finalMessage.slice(2, -2).trim();
+				}
+
 				await setCommitMessage(finalMessage, output, workspaceDir);
 			} else {
 				reportError(M.errors.noResult(), output);
