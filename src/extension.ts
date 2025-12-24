@@ -68,9 +68,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			let finalMessage = result.finalResponse?.trim();
 
 			if (finalMessage) {
+				// finalMessageの先頭と末尾の両方に「`」が３つずつ付いてるなら、先頭と末尾の「`」を３つずつ削除する
+				if (finalMessage.startsWith('```') && finalMessage.endsWith('```')) {
+					finalMessage = finalMessage.slice(3, -3).trim();
+				}
 				// finalMessageの先頭と末尾の両方に「`」が付いてるなら、先頭と末尾の「`」を削除する
-				if (finalMessage.startsWith('`') && finalMessage.endsWith('`')) {
-					finalMessage = finalMessage.slice(1, -1);
+				else if (finalMessage.startsWith('`') && finalMessage.endsWith('`')) {
+					finalMessage = finalMessage.slice(1, -1).trim();
 				}
 
 				await setCommitMessage(finalMessage, output, workspaceDir);
