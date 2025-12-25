@@ -305,14 +305,14 @@ function isJapanese(): boolean {
 const DEFAULT_INTRO_EN = [
 	'You are an assistant that drafts commit messages using the provided Git information.',
 	'All required Git data has already been collected below. Do not run additional git commands.',
-	'Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English.',
+	'Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English. Do not use Markdown syntax; write in plain text.',
 	'Return only the final commit message proposal.'
 ];
 
 const DEFAULT_INTRO_JA = [
 	'あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。',
 	'必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。',
-	'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。',
+	'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。',
 	'最終的なコミットメッセージ案だけを返してください。'
 ];
 
