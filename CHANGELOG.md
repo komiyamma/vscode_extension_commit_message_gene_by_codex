@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.14
+
+- Clarified the default Codex intro prompts to require plain-text (no Markdown) output for generated commit messages.
+
 ## 0.3.13
 
 - Added a plain-text instruction to the default Codex intro prompts to avoid Markdown formatting in generated commit messages.
