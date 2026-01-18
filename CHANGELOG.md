@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.15
+
+- Upgraded Codex to a newer version.
+
 ## 0.3.14
 
 - Clarified the default Codex intro prompts to require plain-text (no Markdown) output for generated commit messages.
