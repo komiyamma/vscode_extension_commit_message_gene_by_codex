@@ -35,4 +35,4 @@ GitHub Copilot が使えない環境でも手軽に使えます。
 
 ## ライセンス
 
-MIT License © 2025 komiyamma
+MIT License © 2025-2026 komiyamma

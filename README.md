@@ -35,5 +35,5 @@ It’s also handy in environments where GitHub Copilot is not available.
 
 ## License
 
-MIT License © 2025 komiyamma
+MIT License © 2025-2026 komiyamma
 
