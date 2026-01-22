@@ -54,16 +54,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			// Load the ESM-only Codex package dynamically to avoid require() in CommonJS
 			const { Codex } = await import('@openai/codex-sdk');
 			const codex = new Codex();
-			const thread = codex.startThread({
-				model: 'gpt-5.1-codex-mini',
-				workingDirectory: workspaceDir,
-				skipGitRepoCheck: true,
-			});
 
 			// vscode.window.showInformationMessage(gitContext);
 
 			const prompt = buildPrompt(gitContext);
-			const result = await thread.run(prompt);
+			const result = await runWithEffortFallback(codex, prompt, workspaceDir);
 
 			let finalMessage = result.finalResponse?.trim();
 
@@ -330,6 +325,33 @@ function buildPrompt(gitContext: string): string {
 	const introLines = resolvedIntro.length > 0 ? resolvedIntro : defaultIntro;
 
 	return [...introLines, gitContext].join('\n\n');
+}
+
+async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: string) {
+	const baseOpts = {
+		model: 'gpt-5.1-codex-mini',
+		workingDirectory: workspaceDir,
+		skipGitRepoCheck: true,
+	} as const;
+
+	try {
+		const t1 = codex.startThread(baseOpts);
+		return await t1.run(prompt);
+	} catch (e: any) {
+		const msg = (e?.message ?? String(e)).toLowerCase();
+		const isEffortXhighError =
+			msg.includes('param') &&
+			msg.includes('reasoning.effort') &&
+			msg.includes('xhigh') &&
+			(msg.includes('unsupported_value') || msg.includes('unsupported value'));
+
+		if (!isEffortXhighError) {
+			throw e;
+		}
+
+		const t2 = codex.startThread({ ...baseOpts, modelReasoningEffort: 'high' });
+		return await t2.run(prompt);
+	}
 }
 // Stream git stdout while enforcing a soft character limit to prevent buffer overruns.
 async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: number): Promise<string> {
