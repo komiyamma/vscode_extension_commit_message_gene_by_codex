@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.21
+
+- reasoning.effort の未対応設定が拒否された場合の再試行処理を追加し、生成の失敗を減らしました。貢献者: [@SylvainLeprovost](https://github.com/SylvainLeprovost)
+- 既定の reasoning.effort とフォールバック時の値を調整しました。
+
 ## 0.3.15
 
 - Codex本体を新しいバージョンに更新しました。

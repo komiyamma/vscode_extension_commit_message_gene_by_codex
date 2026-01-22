@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.21
+
+- Added a retry path when Codex rejects unsupported reasoning effort settings to keep commit message generation working. Contributed by: [@SylvainLeprovost](https://github.com/SylvainLeprovost)
+- Tuned the default reasoning effort and fallback level to reduce failures.
+
 ## 0.3.15
 
 - Upgraded Codex to a newer version.

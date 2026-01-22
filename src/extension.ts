@@ -332,6 +332,7 @@ async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: s
 		model: 'gpt-5.1-codex-mini',
 		workingDirectory: workspaceDir,
 		skipGitRepoCheck: true,
+		modelReasoningEffort: "low" // minimal/low/medium/high and xhigh(=over 5.2) 
 	} as const;
 
 	try {
@@ -349,7 +350,7 @@ async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: s
 			throw e;
 		}
 
-		const t2 = codex.startThread({ ...baseOpts, modelReasoningEffort: 'high' });
+		const t2 = codex.startThread({ ...baseOpts, modelReasoningEffort: 'medium' });
 		return await t2.run(prompt);
 	}
 }
