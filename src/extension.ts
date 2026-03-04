@@ -49,7 +49,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			statusSpinner.text = M.status.processing();
 			statusSpinner.show();
 
-			const gitContext = await collectGitContext(workspaceDir);
+			const gitPath = await resolveGitPath();
+			const gitContext = await collectGitContext(workspaceDir, gitPath);
 
 			// Load the ESM-only Codex package dynamically to avoid require() in CommonJS
 			const { Codex } = await import('@openai/codex-sdk');
@@ -182,6 +183,17 @@ async function getGitApi(): Promise<any | undefined> {
 	return typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
 }
 
+// Resolve the git binary path from VS Code's Git extension to avoid PATH dependency.
+async function resolveGitPath(): Promise<string> {
+	const gitApi = await getGitApi();
+	const resolvedPath: string | undefined = gitApi?.git?.path;
+	if (resolvedPath) {
+		return resolvedPath;
+	}
+	// Fallback: assume git is on PATH (should not normally happen in VS Code)
+	return 'git';
+}
+
 // Determine which repository Codex should treat as the working directory.
 async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 	const gitApi = await getGitApi();
@@ -208,12 +220,13 @@ async function resolveWorkspaceDirectory(): Promise<string | undefined> {
 }
 
 // Run a git subcommand and return trimmed stdout or throw a descriptive error.
-async function runGitCommand(args: string[], cwd: string, options?: { softLimit?: number }): Promise<string> {
+async function runGitCommand(args: string[], cwd: string, options?: { softLimit?: number; gitPath?: string }): Promise<string> {
+	const git = options?.gitPath ?? 'git';
 	if (options?.softLimit) {
-		return runGitCommandWithSoftLimit(args, cwd, options.softLimit);
+		return runGitCommandWithSoftLimit(args, cwd, options.softLimit, git);
 	}
 	try {
-		const { stdout } = await execFileAsync('git', args, { cwd, maxBuffer: 1024 * 1024 * 20 });
+		const { stdout } = await execFileAsync(git, args, { cwd, maxBuffer: 1024 * 1024 * 20 });
 		return stdout.trim();
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
@@ -230,12 +243,13 @@ function toErrorMessage(error: unknown): string {
 }
 
 // Gather the git facts Codex needs to craft a conventional commit message.
-async function collectGitContext(cwd: string): Promise<string> {
-	const gitVersion = await runGitCommand(['--version'], cwd);
-	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd);
+async function collectGitContext(cwd: string, gitPath: string): Promise<string> {
+	const opts = { gitPath };
+	const gitVersion = await runGitCommand(['--version'], cwd, opts);
+	const repoRoot = await runGitCommand(['rev-parse', '--show-toplevel'], cwd, opts);
 	const branch = await (async () => {
 		try {
-			return await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+			return await runGitCommand(['rev-parse', '--abbrev-ref', 'HEAD'], cwd, opts);
 		} catch (error) {
 			const message = toErrorMessage(error);
 			if (isHeadMissingError(message)) {
@@ -244,18 +258,18 @@ async function collectGitContext(cwd: string): Promise<string> {
 			throw error;
 		}
 	})();
-	const status = await runGitCommand(['status', '--short', '--branch'], cwd);
-	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
+	const status = await runGitCommand(['status', '--short', '--branch'], cwd, opts);
+	const stagedDiff = await runGitCommand(['diff', '--cached', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT, ...opts });
 	let diffSectionTitle = 'Staged diff';
 	let diffBody = stagedDiff;
 	if (!diffBody) {
 		diffSectionTitle = 'Working tree diff (no staged changes)';
-		diffBody = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT });
+		diffBody = await runGitCommand(['diff', '--color=never'], cwd, { softLimit: GIT_STDOUT_SOFT_LIMIT, ...opts });
 	}
-	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd);
+	const untrackedFiles = await runGitCommand(['ls-files', '--others', '--exclude-standard'], cwd, opts);
 	const recentCommits = await (async () => {
 		try {
-			return await runGitCommand(['log', '--oneline', '-5'], cwd);
+			return await runGitCommand(['log', '--oneline', '-5'], cwd, opts);
 		} catch (error) {
 			const message = toErrorMessage(error);
 			if (isHeadMissingError(message)) {
@@ -355,9 +369,9 @@ async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: s
 	}
 }
 // Stream git stdout while enforcing a soft character limit to prevent buffer overruns.
-async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: number): Promise<string> {
+async function runGitCommandWithSoftLimit(args: string[], cwd: string, limit: number, gitPath: string = 'git'): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const child = spawn('git', args, { cwd });
+		const child = spawn(gitPath, args, { cwd });
 		let stdout = '';
 		let stderr = '';
 		let truncated = false;
