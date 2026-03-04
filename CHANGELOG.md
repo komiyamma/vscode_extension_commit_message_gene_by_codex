@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.22
+
+- Eliminated Git PATH dependency by resolving the Git binary path securely via the official VS Code Git extension API.
+- Updated license copyright year (chore).
+
 ## 0.3.21
 
 - Added a retry path when Codex rejects unsupported reasoning effort settings to keep commit message generation working. Contributed by: [@SylvainLeprovost](https://github.com/SylvainLeprovost)

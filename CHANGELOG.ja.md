@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.22
+
+- 利用環境の Git が PATH に通っていない場合でも動作するよう、VS Code Git 拡張 API が解決済みの Git パスを直接利用することで PATH 依存を解消しました。
+- ライセンスにおける著作権年を更新しました。
+
 ## 0.3.21
 
 - reasoning.effort の未対応設定が拒否された場合の再試行処理を追加し、生成の失敗を減らしました。貢献者: [@SylvainLeprovost](https://github.com/SylvainLeprovost)
