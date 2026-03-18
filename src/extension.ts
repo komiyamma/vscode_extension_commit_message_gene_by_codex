@@ -343,7 +343,7 @@ function buildPrompt(gitContext: string): string {
 
 async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: string) {
 	const baseOpts = {
-		model: 'gpt-5.1-codex-mini',
+		model: 'gpt-5.4-mini',
 		workingDirectory: workspaceDir,
 		skipGitRepoCheck: true,
 		modelReasoningEffort: "low" // minimal/low/medium/high and xhigh(=over 5.2) 
