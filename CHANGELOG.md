@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.23
+
+- Upgraded `@openai/codex-sdk` to 0.107.0.
+- Updated the Codex model used for commit message generation to `gpt-5.4-mini`.
+
 ## 0.3.22
 
 - Eliminated Git PATH dependency by resolving the Git binary path securely via the official VS Code Git extension API.
