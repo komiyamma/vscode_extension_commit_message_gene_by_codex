@@ -2,7 +2,7 @@
   "publisher": "komiyamma",
   "name": "commit-message-gene-by-codex",
   "displayName": "commit-message-gene-by-codex",
-  "description": "Generates commit messages in codex environments. It is intended for use when 'Github Copilot' is no longer available or with 'AWS kiro'.",
+  "description": "This extension automatically generates commit messages in Codex environments. It is intended for use when GitHub Copilot is unavailable, or when using VSCodium-family editors such as Antigravity and AWS Kiro.",
   "version": "0.3.23",
   "repository": {
     "type": "git",

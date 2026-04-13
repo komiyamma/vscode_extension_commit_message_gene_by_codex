@@ -6,9 +6,9 @@
 
 # Commit Message Generator (by Codex)
 
-VSCode extension that automatically generates a Conventional Commits-style commit message from your repository changes and inserts it into the Source Control input box.  
+VS Code extension that automatically generates a Conventional Commits-style commit message from your repository changes and inserts it into the Source Control input box.  
 It can be used in any environment where Codex runs.  
-It’s also handy in environments where GitHub Copilot is not available.
+It is also intended for use when GitHub Copilot is unavailable, or when using VSCodium-family editors such as Antigravity and AWS Kiro.
 
 ## Usage
 
