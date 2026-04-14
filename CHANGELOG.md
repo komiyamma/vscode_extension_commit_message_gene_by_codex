@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.25
+
+- Excluded `logo/logo.psd` from the published extension package.
+
 ## 0.3.24
 
 - Updated the extension display name to `Commit Message Gene by Codex` to avoid the hyphenated package-style form.

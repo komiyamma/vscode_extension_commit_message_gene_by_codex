@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.25
+
+- `logo/logo.psd` を公開用の拡張機能パッケージから除外しました。
+
 ## 0.3.24
 
 - 拡張機能の displayName を `Commit Message Gene by Codex` に変更し、ハイフン入りのパッケージ名風表記をやめました。
