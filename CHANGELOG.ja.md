@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.24
+
+- 拡張機能の displayName を `Commit Message Gene by Codex` に変更し、ハイフン入りのパッケージ名風表記をやめました。
+- README と package の説明文を整理し、Codex 対応エディタや VSCodium 系エディタでの利用想定を明確にしました。
+
 ## 0.3.23
 
 - `@openai/codex-sdk` を 0.107.0 に更新しました。

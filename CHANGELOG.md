@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.3.24
+
+- Updated the extension display name to `Commit Message Gene by Codex` to avoid the hyphenated package-style form.
+- Refreshed the README and package description wording to better describe use in Codex-capable and VSCodium-family editors.
+
 ## 0.3.23
 
 - Upgraded `@openai/codex-sdk` to 0.107.0.
