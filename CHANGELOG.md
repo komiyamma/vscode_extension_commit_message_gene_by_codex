@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.26
+
+- Simplified the reasoning-effort fallback so commit message generation retries with `medium` after a failed first attempt.
+
 ## 0.3.25
 
 - Excluded `logo/logo.psd` from the published extension package.

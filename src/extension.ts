@@ -353,6 +353,7 @@ async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: s
 		const t1 = codex.startThread(baseOpts);
 		return await t1.run(prompt);
 	} catch (e: any) {
+		/*
 		const msg = (e?.message ?? String(e)).toLowerCase();
 		const isEffortXhighError =
 			msg.includes('param') &&
@@ -363,6 +364,7 @@ async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: s
 		if (!isEffortXhighError) {
 			throw e;
 		}
+		*/
 
 		const t2 = codex.startThread({ ...baseOpts, modelReasoningEffort: 'medium' });
 		return await t2.run(prompt);
