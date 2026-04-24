@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.28
+
+- Upgraded `@openai/codex-sdk` to 0.124.0 to keep commit message generation compatible with the latest Codex SDK release.
+
 ## 0.3.26
 
 - Simplified the reasoning-effort fallback so commit message generation retries with `medium` after a failed first attempt.

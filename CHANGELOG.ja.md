@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.28
+
+- `@openai/codex-sdk` を 0.124.0 に更新し、最新の Codex SDK リリースとの互換性を維持しました。
+
 ## 0.3.26
 
 - reasoning.effort のフォールバック処理を簡略化し、最初の試行が失敗した場合は `medium` で再試行するようにしました。
