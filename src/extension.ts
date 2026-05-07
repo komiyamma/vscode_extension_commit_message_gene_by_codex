@@ -38,9 +38,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(output, statusSpinner);
 
 	// Register the command that gathers git context, queries Codex, and updates the SCM input.
-	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async () => {
+	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async (...commandArgs: unknown[]) => {
 		try {
-			const workspaceDir = await resolveWorkspaceDirectory();
+			const workspaceDir = await resolveWorkspaceDirectory(commandArgs);
 			if (!workspaceDir) {
 				vscode.window.showErrorMessage('No workspace folder is open, so Git context cannot be gathered.');
 				return;
@@ -78,7 +78,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					finalMessage = finalMessage.slice(2, -2).trim();
 				}
 
-				await setCommitMessage(finalMessage, output, workspaceDir);
+				await setCommitMessage(finalMessage, output, workspaceDir, commandArgs);
 			} else {
 				reportError(M.errors.noResult(), output);
 			}
@@ -95,7 +95,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 // Safely copy the generated message into the most relevant SCM commit input.
-async function setCommitMessage(message: string, output: vscode.OutputChannel, workspaceDir?: string) {
+async function setCommitMessage(message: string, output: vscode.OutputChannel, workspaceDir?: string, commandArgs: unknown[] = []) {
 	try {
 		// SCMビューをアクティブ化
 		await vscode.commands.executeCommand('workbench.view.scm');
@@ -103,17 +103,17 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel, w
 		const gitApi = await getGitApi();
 		if (gitApi) {
 			const repos = (gitApi.repositories ?? []) as GitRepositoryLike[];
-			const targetRepo = selectRepositoryForCommit(repos, workspaceDir);
+			const targetRepo = selectRepositoryForCommit(repos, workspaceDir, commandArgs);
 			if (targetRepo?.inputBox) {
 				targetRepo.inputBox.value = message;
 				output.appendLine(M.commitArea.copiedGitApi());
 				return;
 			}
 		}
-		// フォールバック: scm.inputBox
-		const scmAny = vscode.scm as any;
-		if (scmAny && scmAny.inputBox) {
-			scmAny.inputBox.value = message;
+		// Fallback: only use an input box supplied by the current SCM command context.
+		const contextInputBox = findInputBoxFromCommandArgs(commandArgs);
+		if (contextInputBox) {
+			contextInputBox.value = message;
 			output.appendLine(M.commitArea.copiedScm());
 			return;
 		}
@@ -125,9 +125,21 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel, w
 }
 
 // Locate the repository whose commit input should be updated, prioritising context matches first.
-function selectRepositoryForCommit(repos: GitRepositoryLike[], workspaceDir?: string) {
+function selectRepositoryForCommit(repos: GitRepositoryLike[], workspaceDir?: string, commandArgs: unknown[] = []) {
 	if (!repos || repos.length === 0) {
 		return undefined;
+	}
+
+	for (const fsPath of extractFsPathsFromCommandArgs(commandArgs)) {
+		const byExactContext = findRepoByFsPath(repos, fsPath);
+		if (byExactContext) {
+			return byExactContext;
+		}
+
+		const byContainingContext = findRepoContainingFsPath(repos, fsPath);
+		if (byContainingContext) {
+			return byContainingContext;
+		}
 	}
 
 	if (workspaceDir) {
@@ -167,6 +179,113 @@ function findRepoByFsPath(repos: GitRepositoryLike[], targetFsPath: string) {
 	const normalizedTarget = normalizeFsPath(targetFsPath);
 	return repos.find(repo => repo?.rootUri?.fsPath && normalizeFsPath(repo.rootUri.fsPath) === normalizedTarget);
 }
+
+// Retrieve the deepest repository whose root contains the provided filesystem path.
+function findRepoContainingFsPath(repos: GitRepositoryLike[], targetFsPath: string) {
+	const normalizedTarget = normalizeFsPath(targetFsPath);
+	return repos
+		.filter(repo => {
+			if (!repo?.rootUri?.fsPath) {
+				return false;
+			}
+			const normalizedRoot = normalizeFsPath(repo.rootUri.fsPath);
+			return normalizedTarget === normalizedRoot || normalizedTarget.startsWith(`${normalizedRoot}${path.sep}`);
+		})
+		.sort((a, b) => (b.rootUri?.fsPath.length ?? 0) - (a.rootUri?.fsPath.length ?? 0))[0];
+}
+
+// Pull repository or resource paths out of SCM command menu arguments.
+function extractFsPathsFromCommandArgs(commandArgs: unknown[]): string[] {
+	const paths: string[] = [];
+	const seen = new Set<unknown>();
+
+	const visit = (value: unknown, depth: number) => {
+		if (!value || depth > 4) {
+			return;
+		}
+
+		if (typeof value !== 'object') {
+			return;
+		}
+
+		if (seen.has(value)) {
+			return;
+		}
+		seen.add(value);
+
+		if (Array.isArray(value)) {
+			value.forEach(item => visit(item, depth + 1));
+			return;
+		}
+
+		const maybeUri = value as { fsPath?: unknown };
+		if (typeof maybeUri.fsPath === 'string') {
+			paths.push(maybeUri.fsPath);
+		}
+
+		const record = value as Record<string, unknown>;
+		for (const key of ['rootUri', 'resourceUri', 'uri', 'sourceUri']) {
+			visit(record[key], depth + 1);
+		}
+		for (const key of ['sourceControl', 'repository', 'repo']) {
+			visit(record[key], depth + 1);
+		}
+	};
+
+	commandArgs.forEach(arg => visit(arg, 0));
+	return [...new Set(paths)];
+}
+
+// Find an input box only when VS Code supplied it through the invoked SCM command context.
+function findInputBoxFromCommandArgs(commandArgs: unknown[]) {
+	const seen = new Set<unknown>();
+
+	const visit = (value: unknown, depth: number): { value: string } | undefined => {
+		if (!value || depth > 4 || typeof value !== 'object') {
+			return undefined;
+		}
+
+		if (seen.has(value)) {
+			return undefined;
+		}
+		seen.add(value);
+
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				const found = visit(item, depth + 1);
+				if (found) {
+					return found;
+				}
+			}
+			return undefined;
+		}
+
+		const record = value as Record<string, unknown>;
+		const inputBox = record.inputBox as { value?: unknown } | undefined;
+		if (inputBox && typeof inputBox.value === 'string') {
+			return inputBox as { value: string };
+		}
+
+		for (const key of ['sourceControl', 'repository', 'repo']) {
+			const found = visit(record[key], depth + 1);
+			if (found) {
+				return found;
+			}
+		}
+
+		return undefined;
+	};
+
+	for (const arg of commandArgs) {
+		const found = visit(arg, 0);
+		if (found) {
+			return found;
+		}
+	}
+
+	return undefined;
+}
+
 // Report failure to both the output channel and a toast without touching SCM text.
 function reportError(message: string, output: vscode.OutputChannel) {
 	output.appendLine(message);
@@ -195,9 +314,14 @@ async function resolveGitPath(): Promise<string> {
 }
 
 // Determine which repository Codex should treat as the working directory.
-async function resolveWorkspaceDirectory(): Promise<string | undefined> {
+async function resolveWorkspaceDirectory(commandArgs: unknown[] = []): Promise<string | undefined> {
 	const gitApi = await getGitApi();
 	const repos = (gitApi?.repositories ?? []) as GitRepositoryLike[];
+	const contextRepo = selectRepositoryForCommit(repos, undefined, commandArgs);
+	if (contextRepo?.rootUri?.fsPath) {
+		return contextRepo.rootUri.fsPath;
+	}
+
 	const selectedRepo = repos.find(repo => repo?.ui?.selected);
 	if (selectedRepo?.rootUri?.fsPath) {
 		return selectedRepo.rootUri.fsPath;
