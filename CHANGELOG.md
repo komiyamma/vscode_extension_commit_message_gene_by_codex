@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.31
+
+- Improved commit message insertion so the extension now prefers the SCM input box and repository from the invoked command context, helping it target the correct repository in multi-root and nested Git setups. Contributed by: [@andreescocard](https://github.com/andreescocard)
+
 ## 0.3.28
 
 - Upgraded `@openai/codex-sdk` to 0.124.0 to keep commit message generation compatible with the latest Codex SDK release.
