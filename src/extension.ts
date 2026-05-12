@@ -207,7 +207,7 @@ async function setCommitMessage(message: string, output: vscode.OutputChannel, w
 		// SCMビューをアクティブ化
 		await vscode.commands.executeCommand('workbench.view.scm');
 		// git拡張のAPIを取り出し（存在すれば）
-		const gitApi = await getGitApi();
+		const gitApi = await getGitApi(output);
 		if (gitApi) {
 			const repos = (gitApi.repositories ?? []) as GitRepositoryLike[];
 			const targetRepo = selectRepositoryForCommit(repos, workspaceDir, commandArgs);
@@ -400,13 +400,21 @@ function reportError(message: string, output: vscode.OutputChannel) {
 }
 
 // Fetch and return the Git extension API, activating the extension lazily if needed.
-async function getGitApi(): Promise<any | undefined> {
-	const gitExt = vscode.extensions.getExtension('vscode.git');
+async function getGitApi(_output?: vscode.OutputChannel): Promise<any | undefined> {
+	const gitExt = vscode.extensions.getExtension('vscode.git')
+		?? vscode.extensions.all.find(extension => extension.id.toLowerCase() === 'vscode.git');
 	if (!gitExt) {
 		return undefined;
 	}
-	const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
-	return typeof exportsAny?.getAPI === 'function' ? exportsAny.getAPI(1) : exportsAny;
+	try {
+		const exportsAny = gitExt.isActive ? (gitExt.exports as any) : await gitExt.activate();
+		if (typeof exportsAny?.getAPI !== 'function') {
+			return exportsAny;
+		}
+		return exportsAny.getAPI(1);
+	} catch {
+		return undefined;
+	}
 }
 
 // Resolve the git binary path from VS Code's Git extension to avoid PATH dependency.
