@@ -3,6 +3,8 @@
 [![Version](https://img.shields.io/badge/version-v0.3.31-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-10.15%2B-6479ff.svg?logo=apple&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-64%2B-6479ff.svg?logo=linux&logoColor=white)
 
 # コミットメッセージジェネレーター (by Codex)
 
@@ -27,7 +29,7 @@ GitHub Copilot が使えない場合や、Antigravity や AWS Kiro などの VSC
 
 - Windows 10/11 + VSCode の Git 拡張が有効であること
 - ソース管理ビュー（SCM）を開いていること
-- codex CLI をグローバルにインストールしてあり、`%APPDATA%\npm\codex.cmd` から実行できること  （ヘルパーはこの場所を探し `cmd.exe` 経由で起動します）
+- codex CLI をグローバルにインストールしてあり、実行可能であること
 
 ## その他
 

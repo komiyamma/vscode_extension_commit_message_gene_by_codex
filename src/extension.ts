@@ -45,6 +45,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	let appServerClient: CodexAppServerClient | undefined;
 	let appServerConnection: Promise<void> | undefined;
+	let appServerConnectionError: string | undefined;
 	let appServerFirstTurn = true;
 
 	const disconnectAppServer = () => {
@@ -70,10 +71,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 			.then((client) => {
 				appServerClient = client;
+				appServerConnectionError = undefined;
 				output.appendLine(`Connected to Codex app-server (${client.mode}).`);
 			})
 			.catch((error) => {
 				const message = error instanceof Error ? error.message : String(error);
+				appServerConnectionError = message;
 				output.appendLine(`Codex app-server connection failed: ${message}`);
 				appServerClient = undefined;
 			})
@@ -104,6 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			statusSpinner.text = M.status.processing();
 			statusSpinner.show();
 
+			connectAppServer();
 			const gitPath = await resolveGitPath();
 			const gitContext = await collectGitContext(workspaceDir, gitPath);
 
@@ -113,6 +117,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const result = await generateCommitMessage(prompt, workspaceDir, output, {
 				getAppServerClient: () => appServerClient,
 				waitForAppServerConnection: () => appServerConnection,
+				getAppServerConnectionError: () => appServerConnectionError,
 				takeAppServerSessionStartSource: () => {
 					const source = appServerFirstTurn ? 'startup' : 'clear';
 					appServerFirstTurn = false;
@@ -157,6 +162,7 @@ export async function activate(context: vscode.ExtensionContext) {
 type GenerateCommitMessageOptions = {
 	getAppServerClient: () => CodexAppServerClient | undefined;
 	waitForAppServerConnection: () => Promise<void> | undefined;
+	getAppServerConnectionError: () => string | undefined;
 	takeAppServerSessionStartSource: () => 'startup' | 'clear';
 	disconnectAppServer: () => void;
 };
@@ -176,13 +182,12 @@ async function generateCommitMessage(
 			if (result.status !== 'completed') {
 				output.appendLine(`Codex app-server turn finished with status: ${result.status}`);
 			}
-			// ★★★ Temporary debug notice: remove after app-server fallback verification. ★★★
-			vscode.window.showInformationMessage(`★★★ DEBUG: Codex app-server でコミットメッセージを生成しました (${appServerClient.mode}) ★★★`, { modal: true });
 			return result.output;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			output.appendLine(`Codex app-server turn failed: ${message}`);
 			options.disconnectAppServer();
+			throw error;
 		}
 	}
 
@@ -190,10 +195,9 @@ async function generateCommitMessage(
 		throw new Error('Codex app-server is not connected. The Codex SDK fallback is only enabled on Windows.');
 	}
 
-	output.appendLine('Falling back to @openai/codex-sdk on Windows.');
+	const connectionError = options.getAppServerConnectionError();
+	output.appendLine(`Falling back to @openai/codex-sdk on Windows.${connectionError ? ` Codex app-server connection error: ${connectionError}` : ''}`);
 	const sdkResult = await generateCommitMessageWithSdk(prompt, workspaceDir);
-	// ★★★ Temporary debug notice: remove after app-server fallback verification. ★★★
-	vscode.window.showInformationMessage('★★★ DEBUG: Windows fallback の @openai/codex-sdk でコミットメッセージを生成しました ★★★', { modal: true });
 	return sdkResult;
 }
 

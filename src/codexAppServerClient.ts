@@ -166,7 +166,7 @@ export class CodexAppServerClient {
 		const threadResponse = await this.request('thread/start', {
 			model: this.options.model,
 			approvalPolicy: 'never',
-			sandbox: 'workspaceWrite',
+			sandbox: 'workspace-write',
 			cwd,
 			serviceName: this.options.clientName,
 			ephemeral: true,
