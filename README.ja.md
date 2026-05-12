@@ -12,28 +12,38 @@
 Codex が動作する環境で利用できます。  
 GitHub Copilot が使えない場合や、Antigravity や AWS Kiro などの VSCodium 系エディタで使う用途も想定しています。
 
-macOS と Linux では Codex CLI が必要です。このバージョンは 2026-05-08 にリリースされています。Windows では Codex CLI のバージョン要件はありません。いずれの OS でも、Codex にログイン済みであることが前提です。
+主なプラットフォーム要件は次のとおりです。
+
+| プラットフォーム | Codex CLI 要件 | その他の要件 |
+| --- | --- | --- |
+| Windows | 特定のバージョン要件なし | Codex にログイン済み |
+| macOS | Codex CLI 0.130.0 以上 | Codex にログイン済み |
+| Linux | Codex CLI 0.130.0 以上 | Codex にログイン済み |
 
 ## 使い方
 
-- UI から（推奨）
-  - ソース管理ビューのタイトルバーとコミット入力欄の近くにボタンが追加されます。クリックで「Commit message generation by codex」を実行します。
-  - Git プロバイダーが有効な場合に表示されます。  
-  [![Commit Input Box Button](images/button.png)](images/button.png)
-  - 生成中はステータスバーに「$(sync~spin) コミットメッセージを生成中…」が表示され、完了時に自動で消えます。  
-  [![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
-- コマンドパレットから
-  - `Ctrl+Shift+P` → 「Commit message generation by codex」と入力
-  - あるいは「Commit message generation by codex」(`commit-message-gene-by-codex.runCodexCmd`) を直接実行
-  - 完了すると、生成メッセージはコミット入力欄に挿入されます。実行ログは出力パネル「codex exec output」で確認できます。
+| 方法 | 実行方法 | 結果 |
+| --- | --- | --- |
+| UI から（推奨） | ソース管理ビューのタイトルバー、またはコミット入力欄の近くにあるボタンをクリック | 「Commit message generation by codex」を実行 |
+| コマンドパレットから | `Ctrl+Shift+P` → 「Commit message generation by codex」と入力 | コマンドを実行し、生成メッセージをコミット入力欄に挿入 |
+| 直接コマンド実行 | `commit-message-gene-by-codex.runCodexCmd` を実行 | 同じコマンドを直接実行 |
+
+UI ボタンは Git プロバイダーが有効な場合に表示されます。  
+[![Commit Input Box Button](images/button.png)](images/button.png)
+
+生成中はステータスバーに「$(sync~spin) コミットメッセージを生成中…」が表示され、完了時に自動で消えます。  
+[![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
+
+実行ログは出力パネル「codex exec output」で確認できます。
 
 ## 要件
 
-- macOS / Linux: codex CLI がインストール済みで実行可能である
-- Windows: codex CLI のバージョン要件はない
-- すべての OS: Codex にログイン済みである
-- すべての OS: VS Code の Git 拡張が有効である
-- すべての OS: Source Control (SCM) ビューを開いている
+| 要件 | Windows | macOS | Linux |
+| --- | --- | --- | --- |
+| Codex CLI | 特定のバージョン要件なし | 0.130.0 以上 | 0.130.0 以上 |
+| Codex ログイン | 必須 | 必須 | 必須 |
+| VS Code の Git 拡張 | 有効 | 有効 | 有効 |
+| Source Control (SCM) ビュー | 開いている | 開いている | 開いている |
 
 ## その他
 

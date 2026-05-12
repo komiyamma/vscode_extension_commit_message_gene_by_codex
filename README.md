@@ -12,28 +12,38 @@ VS Code extension that automatically generates a Conventional Commits-style comm
 It can be used in any environment where Codex runs.  
 It is also intended for use when GitHub Copilot is unavailable, or when using VSCodium-family editors such as Antigravity and AWS Kiro.
 
-On macOS and Linux, Codex CLI is required. That version was released on 2026-05-08. On Windows, there is no Codex CLI version constraint. In all cases, you must also be logged in to Codex.
+The main platform requirements are:
+
+| Platform | Codex CLI requirement | Other requirement |
+| --- | --- | --- |
+| Windows | No specific version requirement | Logged in to Codex |
+| macOS | Codex CLI 0.130.0 or later | Logged in to Codex |
+| Linux | Codex CLI 0.130.0 or later | Logged in to Codex |
 
 ## Usage
 
-- From the UI (recommended)
-  - A button is added to the Source Control view title bar and near the commit input box. Click it to run “Commit message generation by codex.”
-  - It appears when the Git provider is active.  
-  [![Commit Input Box Button](images/button.png)](images/button.png)
-  - While generating, the status bar shows “$(sync~spin) Generating commit message…” and it disappears automatically when finished.  
-  [![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
-- From the Command Palette
-  - Press `Ctrl+Shift+P` and type “Commit message generation by codex”.
-  - Or run “Commit message generation by codex” (`commit-message-gene-by-codex.runCodexCmd`) directly.
-  - When finished, the generated message is inserted into the commit input box. You can check the execution log in the Output panel “codex exec output”.
+| Method | How to run | Result |
+| --- | --- | --- |
+| UI (recommended) | Click the button in the Source Control view title bar or near the commit input box. | Runs “Commit message generation by codex.” |
+| Command Palette | Press `Ctrl+Shift+P` and type “Commit message generation by codex”. | Runs the command and inserts the generated message into the commit input box. |
+| Direct command | Run `commit-message-gene-by-codex.runCodexCmd`. | Runs the same command directly. |
+
+The UI button appears when the Git provider is active.  
+[![Commit Input Box Button](images/button.png)](images/button.png)
+
+While generating, the status bar shows “$(sync~spin) Generating commit message…” and it disappears automatically when finished.  
+[![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
+
+You can check the execution log in the Output panel “codex exec output”.
 
 ## Requirements
 
-- macOS / Linux: Codex CLI is installed and executable
-- Windows: there is no Codex CLI version requirement
-- All OSes: you are logged in to Codex
-- All OSes: VS Code's Git extension is enabled
-- All OSes: the Source Control (SCM) view is open
+| Requirement | Windows | macOS | Linux |
+| --- | --- | --- | --- |
+| Codex CLI | No specific version requirement | 0.130.0 or later | 0.130.0 or later |
+| Codex login | Required | Required | Required |
+| VS Code Git extension | Enabled | Enabled | Enabled |
+| Source Control (SCM) view | Open | Open | Open |
 
 ## Notes
 
