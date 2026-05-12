@@ -2,9 +2,9 @@
 
 [![Version](https://img.shields.io/badge/version-v0.3.31-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
-![macOS](https://img.shields.io/badge/macOS-10.15%2B-6479ff.svg?logo=apple&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-64%2B-6479ff.svg?logo=linux&logoColor=white)
+![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=microsoft&logoColor=white)
+![macOS](https://img.shields.io/static/v1?label=macOS&message=&color=6479ff&logo=apple&logoColor=white)
+![Linux](https://img.shields.io/static/v1?label=Linux&message=&color=6479ff&logo=linux&logoColor=white)
 
 # Commit Message Generator (by Codex)
 
@@ -12,7 +12,7 @@ VS Code extension that automatically generates a Conventional Commits-style comm
 It can be used in any environment where Codex runs.  
 It is also intended for use when GitHub Copilot is unavailable, or when using VSCodium-family editors such as Antigravity and AWS Kiro.
 
-On macOS and Linux, Codex CLI 0.130.0 or later is required. That version was released on 2026-05-08. On Windows, there is no Codex CLI version constraint. In all cases, you must also be logged in to Codex.
+On macOS and Linux, Codex CLI is required. That version was released on 2026-05-08. On Windows, there is no Codex CLI version constraint. In all cases, you must also be logged in to Codex.
 
 ## Usage
 
@@ -29,13 +29,11 @@ On macOS and Linux, Codex CLI 0.130.0 or later is required. That version was rel
 
 ## Requirements
 
-- macOS / Linux: Codex CLI 0.130.0 or later is installed, and you are logged in to Codex
-- macOS / Linux: Codex CLI 0.130.0 was released on 2026-05-08
-- Windows: there is no Codex CLI version requirement, and you are logged in to Codex
-- Windows 10/11: Codex CLI is installed globally and executable
+- macOS / Linux: Codex CLI is installed and executable
+- Windows: there is no Codex CLI version requirement
+- All OSes: you are logged in to Codex
 - All OSes: VS Code's Git extension is enabled
 - All OSes: the Source Control (SCM) view is open
-- All OSes: you are logged in to Codex
 
 ## Notes
 

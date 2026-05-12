@@ -2,15 +2,17 @@
 
 [![Version](https://img.shields.io/badge/version-v0.3.31-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=windows&logoColor=white)
-![macOS](https://img.shields.io/badge/macOS-10.15%2B-6479ff.svg?logo=apple&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-64%2B-6479ff.svg?logo=linux&logoColor=white)
+![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=microsoft&logoColor=white)
+![macOS](https://img.shields.io/static/v1?label=macOS&message=&color=6479ff&logo=apple&logoColor=white)
+![Linux](https://img.shields.io/static/v1?label=Linux&message=&color=6479ff&logo=linux&logoColor=white)
 
 # コミットメッセージジェネレーター (by Codex)
 
 リポジトリの変更から Conventional Commits 形式のコミットメッセージを自動生成して、ソース管理の入力欄へ挿入する VSCode 拡張です。  
 Codex が動作する環境で利用できます。  
 GitHub Copilot が使えない場合や、Antigravity や AWS Kiro などの VSCodium 系エディタで使う用途も想定しています。
+
+macOS と Linux では Codex CLI が必要です。このバージョンは 2026-05-08 にリリースされています。Windows では Codex CLI のバージョン要件はありません。いずれの OS でも、Codex にログイン済みであることが前提です。
 
 ## 使い方
 
@@ -27,9 +29,11 @@ GitHub Copilot が使えない場合や、Antigravity や AWS Kiro などの VSC
 
 ## 要件
 
-- Windows 10/11 + VSCode の Git 拡張が有効であること
-- ソース管理ビュー（SCM）を開いていること
-- codex CLI をグローバルにインストールしてあり、実行可能であること
+- macOS / Linux: codex CLI がインストール済みで実行可能である
+- Windows: codex CLI のバージョン要件はない
+- すべての OS: Codex にログイン済みである
+- すべての OS: VS Code の Git 拡張が有効である
+- すべての OS: Source Control (SCM) ビューを開いている
 
 ## その他
 
