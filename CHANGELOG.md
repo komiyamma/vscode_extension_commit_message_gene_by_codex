@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.4.5
+
+- Fixed the extension so it works correctly again in AWS Kiro.
+
 ## 0.4.1
 
 - Added Codex App Server connection support for commit message generation.
