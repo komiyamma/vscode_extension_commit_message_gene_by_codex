@@ -137,6 +137,7 @@ export class CodexAppServerClient {
 		const proc = spawn(command, args, {
 			stdio: ['pipe', 'pipe', 'inherit'],
 			shell: process.platform === 'win32',
+			windowsHide: true,
 		});
 		return new CodexAppServerClient(proc, mode, options);
 	}
