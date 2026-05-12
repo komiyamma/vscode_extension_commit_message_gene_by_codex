@@ -18,6 +18,8 @@
     "SCM Providers"
   ],
   "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:.git",
     "onCommand:commit-message-gene-by-codex.runCodexCmd"
   ],
   "main": "./out/extension.js",

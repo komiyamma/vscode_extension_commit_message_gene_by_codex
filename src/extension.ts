@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { execFile, spawn } from 'child_process';
 import { promisify } from 'util';
 import * as path from 'path';
+import { CodexAppServerClient } from './codexAppServerClient';
 
 // Promisified wrapper for spawning git commands without direct callback usage.
 const execFileAsync = promisify(execFile);
@@ -9,6 +10,11 @@ const execFileAsync = promisify(execFile);
 const MAX_SECTION_LENGTH = 3000;
 // Soft cap for git stdout when we stream output to avoid buffer exhaustion.
 const GIT_STDOUT_SOFT_LIMIT = 40000;
+const CODEX_MODEL = 'gpt-5.4-mini';
+const CODEX_REASONING_EFFORT = 'low';
+const APP_SERVER_CLIENT_NAME = 'commit_message_gene_by_codex';
+const APP_SERVER_CLIENT_TITLE = 'Commit Message Gene by Codex';
+const APP_SERVER_CLIENT_VERSION = '0.3.31';
 
 type GitRepositoryLike = {
 	rootUri?: vscode.Uri;
@@ -37,6 +43,55 @@ export async function activate(context: vscode.ExtensionContext) {
 	const statusSpinner = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
 	context.subscriptions.push(output, statusSpinner);
 
+	let appServerClient: CodexAppServerClient | undefined;
+	let appServerConnection: Promise<void> | undefined;
+	let appServerFirstTurn = true;
+
+	const disconnectAppServer = () => {
+		appServerClient?.close();
+		appServerClient = undefined;
+		appServerConnection = undefined;
+		appServerFirstTurn = true;
+	};
+
+	const connectAppServer = () => {
+		if (appServerClient || appServerConnection || !vscode.workspace.workspaceFolders?.length) {
+			return;
+		}
+
+		output.appendLine('Connecting to Codex app-server...');
+		appServerConnection = CodexAppServerClient.connect({
+			clientName: APP_SERVER_CLIENT_NAME,
+			clientTitle: APP_SERVER_CLIENT_TITLE,
+			clientVersion: APP_SERVER_CLIENT_VERSION,
+			model: CODEX_MODEL,
+			reasoningEffort: CODEX_REASONING_EFFORT,
+			onLog: (message) => output.appendLine(message),
+		})
+			.then((client) => {
+				appServerClient = client;
+				output.appendLine(`Connected to Codex app-server (${client.mode}).`);
+			})
+			.catch((error) => {
+				const message = error instanceof Error ? error.message : String(error);
+				output.appendLine(`Codex app-server connection failed: ${message}`);
+				appServerClient = undefined;
+			})
+			.finally(() => {
+				appServerConnection = undefined;
+			});
+	};
+
+	connectAppServer();
+	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => {
+		if (!vscode.workspace.workspaceFolders?.length) {
+			disconnectAppServer();
+			return;
+		}
+		connectAppServer();
+	}));
+	context.subscriptions.push({ dispose: disconnectAppServer });
+
 	// Register the command that gathers git context, queries Codex, and updates the SCM input.
 	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async (...commandArgs: unknown[]) => {
 		try {
@@ -52,16 +107,21 @@ export async function activate(context: vscode.ExtensionContext) {
 			const gitPath = await resolveGitPath();
 			const gitContext = await collectGitContext(workspaceDir, gitPath);
 
-			// Load the ESM-only Codex package dynamically to avoid require() in CommonJS
-			const { Codex } = await import('@openai/codex-sdk');
-			const codex = new Codex();
-
 			// vscode.window.showInformationMessage(gitContext);
 
 			const prompt = buildPrompt(gitContext);
-			const result = await runWithEffortFallback(codex, prompt, workspaceDir);
+			const result = await generateCommitMessage(prompt, workspaceDir, output, {
+				getAppServerClient: () => appServerClient,
+				waitForAppServerConnection: () => appServerConnection,
+				takeAppServerSessionStartSource: () => {
+					const source = appServerFirstTurn ? 'startup' : 'clear';
+					appServerFirstTurn = false;
+					return source;
+				},
+				disconnectAppServer,
+			});
 
-			let finalMessage = result.finalResponse?.trim();
+			let finalMessage = result?.trim();
 
 			if (finalMessage) {
 				// finalMessageの先頭と末尾の両方に「`」が３つずつ付いてるなら、先頭と末尾の「`」を３つずつ削除する
@@ -92,6 +152,49 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+}
+
+type GenerateCommitMessageOptions = {
+	getAppServerClient: () => CodexAppServerClient | undefined;
+	waitForAppServerConnection: () => Promise<void> | undefined;
+	takeAppServerSessionStartSource: () => 'startup' | 'clear';
+	disconnectAppServer: () => void;
+};
+
+async function generateCommitMessage(
+	prompt: string,
+	workspaceDir: string,
+	output: vscode.OutputChannel,
+	options: GenerateCommitMessageOptions,
+): Promise<string | undefined> {
+	await options.waitForAppServerConnection()?.catch(() => undefined);
+
+			const appServerClient = options.getAppServerClient();
+	if (appServerClient) {
+		try {
+			const result = await appServerClient.runFreshTurn(prompt, workspaceDir, options.takeAppServerSessionStartSource());
+			if (result.status !== 'completed') {
+				output.appendLine(`Codex app-server turn finished with status: ${result.status}`);
+			}
+			// ★★★ Temporary debug notice: remove after app-server fallback verification. ★★★
+			vscode.window.showInformationMessage(`★★★ DEBUG: Codex app-server でコミットメッセージを生成しました (${appServerClient.mode}) ★★★`, { modal: true });
+			return result.output;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			output.appendLine(`Codex app-server turn failed: ${message}`);
+			options.disconnectAppServer();
+		}
+	}
+
+	if (process.platform !== 'win32') {
+		throw new Error('Codex app-server is not connected. The Codex SDK fallback is only enabled on Windows.');
+	}
+
+	output.appendLine('Falling back to @openai/codex-sdk on Windows.');
+	const sdkResult = await generateCommitMessageWithSdk(prompt, workspaceDir);
+	// ★★★ Temporary debug notice: remove after app-server fallback verification. ★★★
+	vscode.window.showInformationMessage('★★★ DEBUG: Windows fallback の @openai/codex-sdk でコミットメッセージを生成しました ★★★', { modal: true });
+	return sdkResult;
 }
 
 // Safely copy the generated message into the most relevant SCM commit input.
@@ -465,17 +568,21 @@ function buildPrompt(gitContext: string): string {
 	return [...introLines, gitContext].join('\n\n');
 }
 
-async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: string) {
+async function generateCommitMessageWithSdk(prompt: string, workspaceDir: string): Promise<string | undefined> {
+	// Load the ESM-only Codex package dynamically to avoid require() in CommonJS.
+	const { Codex } = await import('@openai/codex-sdk');
+	const codex = new Codex();
 	const baseOpts = {
-		model: 'gpt-5.4-mini',
+		model: CODEX_MODEL,
 		workingDirectory: workspaceDir,
 		skipGitRepoCheck: true,
-		modelReasoningEffort: "low" // minimal/low/medium/high and xhigh(=over 5.2) 
+		modelReasoningEffort: CODEX_REASONING_EFFORT, // minimal/low/medium/high and xhigh(=over 5.2)
 	} as const;
 
 	try {
 		const t1 = codex.startThread(baseOpts);
-		return await t1.run(prompt);
+		const result = await t1.run(prompt);
+		return result.finalResponse?.trim();
 	} catch (e: any) {
 		/*
 		const msg = (e?.message ?? String(e)).toLowerCase();
@@ -491,7 +598,8 @@ async function runWithEffortFallback(codex: any, prompt: string, workspaceDir: s
 		*/
 
 		const t2 = codex.startThread({ ...baseOpts, modelReasoningEffort: 'medium' });
-		return await t2.run(prompt);
+		const result = await t2.run(prompt);
+		return result.finalResponse?.trim();
 	}
 }
 // Stream git stdout while enforcing a soft character limit to prevent buffer overruns.
