@@ -3,8 +3,8 @@
 [![Version](https://img.shields.io/badge/version-v0.3.31-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10|11](https://img.shields.io/badge/Windows-_10_|_11-6479ff.svg?logo=microsoft&logoColor=white)
-![macOS](https://img.shields.io/static/v1?label=macOS&message=&color=6479ff&logo=apple&logoColor=white)
-![Linux](https://img.shields.io/static/v1?label=Linux&message=&color=6479ff&logo=linux&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-OK-6479ff.svg?logo=apple&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-OK-6479ff.svg?logo=linux&logoColor=white)
 
 # コミットメッセージジェネレーター (by Codex)
 
