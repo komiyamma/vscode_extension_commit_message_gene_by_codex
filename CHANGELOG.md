@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.4.1
+
+- Added Codex App Server connection support for commit message generation.
+
 ## 0.3.31
 
 - Improved commit message insertion so the extension now prefers the SCM input box and repository from the invoked command context, helping it target the correct repository in multi-root and nested Git setups. Contributed by: [@andreescocard](https://github.com/andreescocard)
