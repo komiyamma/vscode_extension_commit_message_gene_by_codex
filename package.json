@@ -32,6 +32,16 @@
         "command": "commit-message-gene-by-codex.runCodexCmd",
         "title": "Commit message generation by codex",
         "icon": "$(sparkle-filled)"
+      },
+      {
+        "command": "commit-message-gene-by-codex.selectPromptProfile",
+        "title": "Commit Message Gene: Select Prompt Profile",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "commit-message-gene-by-codex.managePromptProfiles",
+        "title": "Commit Message Gene: Manage Prompt Profiles",
+        "icon": "$(settings-gear)"
       }
     ],
     "menus": {
@@ -47,37 +57,69 @@
           "command": "commit-message-gene-by-codex.runCodexCmd",
           "group": "navigation@100",
           "when": "scmProvider == git"
+        },
+        {
+          "command": "commit-message-gene-by-codex.selectPromptProfile",
+          "group": "navigation@90",
+          "when": "scmProvider == git"
         }
       ]
     },
     "configuration": {
       "title": "Commit Message Gene by Codex",
       "properties": {
-        "commitMessageGene.prompt.intro.en": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "markdownDescription": "English instructions shown to Codex before the Git context. Each array item becomes a paragraph with a blank line between entries.",
-          "default": [
-            "You are an assistant that drafts commit messages using the provided Git information.",
-            "All required Git data has already been collected below. Do not run additional git commands.",
-            "Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English. Do not use Markdown syntax; write in plain text.",
-            "Return only the final commit message proposal."
-          ]
+        "commitMessageGene.model": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "gpt-5.6-sol",
+            "gpt-5.6-terra",
+            "gpt-5.6-luna"
+          ],
+          "enumDescriptions": [
+            "Recommended: let the signed-in Codex account choose its available default model.",
+            "Balanced Codex model, if available for your account and Codex version.",
+            "Higher-capability Codex model, if available for your account and Codex version.",
+            "Fast Codex model, if available for your account and Codex version."
+          ],
+          "markdownDescription": "Model used to generate commit messages. Use `auto` (recommended) to let Codex choose an available account model. The setting takes effect immediately; the extension retries with the Codex default if a selected model is unavailable."
         },
-        "commitMessageGene.prompt.intro.ja": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "markdownDescription": "Japanese instructions shown to Codex before the Git context. Each array item becomes a paragraph with a blank line between entries.",
-          "default": [
-            "あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。",
-            "必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。",
-            "サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。",
-            "最終的なコミットメッセージ案だけを返してください。"
-          ]
+        "commitMessageGene.messageMode": {
+          "type": "string",
+          "default": "summary",
+          "enum": [
+            "summary",
+            "detailed"
+          ],
+          "enumDescriptions": [
+            "Return only the Conventional Commit summary line.",
+            "Return the summary followed by a blank line and 2-6 concrete change-detail bullets."
+          ],
+          "markdownDescription": "Controls whether generated commit messages include code and behavior change details in their body."
+        },
+        "commitMessageGene.prompt.profile": {
+          "type": "string",
+          "default": "en",
+          "enum": [
+            "en",
+            "ja",
+            "ko",
+            "custom"
+          ],
+          "enumDescriptions": [
+            "Load the built-in English prompt into Prompt Text.",
+            "Load the built-in Japanese prompt into Prompt Text.",
+            "Load the built-in Korean prompt into Prompt Text.",
+            "Keep the custom prompt loaded from the prompt picker."
+          ],
+          "markdownDescription": "Select a built-in profile to load it into Prompt Text. Use `Commit Message Gene: Select Prompt Profile` to load a saved custom profile."
+        },
+        "commitMessageGene.prompt.text": {
+          "type": "string",
+          "editPresentation": "multilineText",
+          "markdownDescription": "The active prompt sent to Codex before Git context. Edit this text freely. Select, save, or delete profiles with the Prompt Profile commands.",
+          "default": "You are an assistant that drafts commit messages using the provided Git information.\n\nAll required Git data has already been collected below. Do not run additional git commands.\n\nWrite the message in English. Return only the final commit message proposal."
         }
       }
     }
@@ -103,6 +145,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.21.0",
-    "@openai/codex-sdk": "^0.124.0"
+    "@openai/codex-sdk": "^0.153.4"
   }
 }
