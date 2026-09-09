@@ -1,6 +1,6 @@
 [Japanese README](README.ja.md)
 
-[![Version](https://img.shields.io/badge/version-v0.4.5-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
+[![Version](https://img.shields.io/badge/version-v0.5.0-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10｜11](https://img.shields.io/badge/Windows-10%20%7C%2011-5865F2?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMWgxMHYxMEgweiBNMTMgMWgxMHYxMEgxM3ogTTAgMTNoMTB2MTBIMHogTTEzIDEzaDEwdjEwSDEzeiIvPjwvc3ZnPg%3D%3D)
 
@@ -32,6 +32,10 @@ The main platform requirements are:
 The UI button appears when the Git provider is active.  
 [![Commit Input Box Button](images/button.png)](images/button.png)
 
+Codex analyzes the Git changes and chooses the most appropriate Conventional Commit type, such as `feat`, `fix`, `docs`, or `refactor`. The generated summary follows the `type(scope): subject` format—for example, `feat(extension): add prompt profiles`.
+
+Use **Commit Message Gene: Select Prompt Profile** in the Source Control title bar or Command Palette to choose the built-in English, Japanese, or Korean profile. **Commit Message Gene: Manage Prompt Profiles** lets you add, edit, and delete custom profiles.
+
 While generating, the status bar shows “$(sync~spin) Generating commit message…” and it disappears automatically when finished.  
 [![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
 
@@ -45,6 +49,13 @@ You can check the execution log in the Output panel “codex exec output”.
 | Codex login | Required | Required | Required |
 | VS Code Git extension | Enabled | Enabled | Enabled |
 | Source Control (SCM) view | Open | Open | Open |
+
+## Settings
+
+- `Commit Message Gene by Codex: Model`: use `auto` (recommended) to let the signed-in Codex account choose an available model, or select a specific model. The extension reconnects automatically after a change and falls back to the account default if that model is unavailable.
+- `Commit Message Gene by Codex: Message Mode`: choose `summary` for a title only, or `detailed` for a title plus 2-6 concrete code and behavior change bullets.
+- `Commit Message Gene by Codex: Prompt Profile`: load the English, Japanese, Korean, or a saved custom profile.
+- `Commit Message Gene by Codex: Prompt Text`: the single multiline text area for freely editing the active prompt. Use the profile commands to load, save, edit, or delete custom profiles.
 
 ## Notes
 

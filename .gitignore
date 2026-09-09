@@ -4,6 +4,9 @@ node_modules/
 # Build output
 out/
 
+# VS Code integration-test runtime
+.vscode-test/
+
 # Packaged extensions
 *.vsix
 
