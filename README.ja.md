@@ -1,6 +1,6 @@
 [English README](README.md)
 
-[![Version](https://img.shields.io/badge/version-v0.4.5-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
+[![Version](https://img.shields.io/badge/version-v0.5.0-4094ff.svg)](https://marketplace.visualstudio.com/items?itemName=komiyamma.commit-message-gene-by-codex)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![Windows 10｜11](https://img.shields.io/badge/Windows-10%20%7C%2011-5865F2?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMWgxMHYxMEgweiBNMTMgMWgxMHYxMEgxM3ogTTAgMTNoMTB2MTBIMHogTTEzIDEzaDEwdjEwSDEzeiIvPjwvc3ZnPg%3D%3D)
 ![macOS](https://img.shields.io/badge/macOS-OK-6479ff.svg?logo=apple&logoColor=white)
@@ -31,6 +31,10 @@ GitHub Copilot が使えない場合や、Antigravity や AWS Kiro などの VSC
 UI ボタンは Git プロバイダーが有効な場合に表示されます。  
 [![Commit Input Box Button](images/button.png)](images/button.png)
 
+Codex が Git の変更を分析し、`feat`、`fix`、`docs`、`refactor` などから最も適切な Conventional Commit 種別を自動で選択します。生成されるタイトルは `type(scope): subject` 形式（例: `feat(extension): add prompt profiles`）になります。
+
+ソース管理タイトルバーまたはコマンドパレットの **Commit Message Gene: Select Prompt Profile** で、英語・日本語・韓国語の基本プロファイルを選択できます。**Commit Message Gene: Manage Prompt Profiles** では、カスタムプロファイルを追加・編集・削除できます。
+
 生成中はステータスバーに「$(sync~spin) コミットメッセージを生成中…」が表示され、完了時に自動で消えます。  
 [![Commit StatusBar](images/statusbar.png)](images/statusbar.png)
 
@@ -44,6 +48,13 @@ UI ボタンは Git プロバイダーが有効な場合に表示されます。
 | Codex ログイン | 必須 | 必須 | 必須 |
 | VS Code の Git 拡張 | 有効 | 有効 | 有効 |
 | Source Control (SCM) ビュー | 開いている | 開いている | 開いている |
+
+## 設定
+
+- `Commit Message Gene by Codex: Model`: `auto`（推奨）では、Codex にログインしているアカウントで利用可能なモデルが自動選択されます。特定モデルの選択も可能です。変更後、拡張機能は自動的に再接続し、選択モデルが利用できない場合はアカウントの既定モデルにフォールバックします。
+- `Commit Message Gene by Codex: Message Mode`: `summary` はタイトルのみ、`detailed` はタイトルに続けて具体的なコード・動作変更を示す 2～6 件の箇条書きを生成します。
+- `Commit Message Gene by Codex: Prompt Profile`: 英語・日本語・韓国語、または保存済みカスタムプロファイルを読み込みます。
+- `Commit Message Gene by Codex: Prompt Text`: 有効なプロンプトを自由に編集する単一の複数行テキストエリアです。プロファイルコマンドでカスタムプロファイルの読み込み、保存、編集、削除を行えます。
 
 ## その他
 
