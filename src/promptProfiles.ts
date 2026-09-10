@@ -14,21 +14,21 @@ type PromptProfile = {
 const DEFAULT_PROFILE_EN = [
 	'You are an assistant that drafts commit messages using the provided Git information.',
 	'All required Git data has already been collected below. Do not run additional git commands.',
-	'Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English. Do not use Markdown syntax; write in plain text.',
+	'Write the message in English. Do not use Markdown syntax; write in plain text.',
 	'Return only the final commit message proposal.'
 ];
 
 const DEFAULT_PROFILE_JA = [
 	'あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。',
 	'必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。',
-	'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。',
+	'コミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。',
 	'最終的なコミットメッセージ案だけを返してください。'
 ];
 
 const DEFAULT_PROFILE_KO = [
 	'제공된 Git 정보를 바탕으로 커밋 메시지 초안을 작성하는 도우미입니다.',
 	'필요한 Git 정보는 아래에 이미 수집되어 있습니다. 추가 Git 명령을 실행하지 마세요.',
-	'요약 줄은 Conventional Commits 형식(type(scope?): subject)을 따르고, 변경 사항을 설명하는 데 도움이 될 때만 본문을 추가하세요. 메시지는 한국어로 작성하세요. Markdown 문법을 사용하지 말고 일반 텍스트로 작성하세요.',
+	'메시지는 한국어로 작성하세요. Markdown 문법을 사용하지 말고 일반 텍스트로 작성하세요.',
 	'최종 커밋 메시지 제안만 반환하세요.'
 ];
 
@@ -45,12 +45,12 @@ function getCommitMessageLanguage(): CommitMessageLanguage {
 
 function buildCommitTypeInstruction(language: CommitMessageLanguage): string {
 	if (language === 'ko') {
-		return 'Git 변경을 분석해 가장 적절한 Conventional Commit 유형(feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert 등)을 스스로 선택하세요. 제목은 반드시 `type(scope): subject` 형식으로 작성하세요. 변경된 파일 또는 모듈이 분명하면 scope에 넣고, 적절한 scope이 없으면 `type: subject` 형식을 사용하세요. 본문이 필요하면 제목 뒤에 빈 줄을 하나 넣은 뒤 작성하세요.';
+		return 'Git 변경을 분석해 가장 적절한 Conventional Commit 유형(feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert 등)을 스스로 선택하세요. 제목은 반드시 `type(scope): subject` 형식으로 작성하세요. 변경된 파일 또는 모듈이 분명하면 scope에 넣고, 적절한 scope이 없으면 `type: subject` 형식을 사용하세요.';
 	}
 	if (language === 'ja') {
-		return 'Git の変更を分析して、最も適切な Conventional Commit 種別（feat、fix、docs、style、refactor、perf、test、build、ci、chore、revert など）を自分で選択してください。タイトルは必ず `type(scope): subject` 形式で記述してください。変更したファイルまたはモジュールが明確な場合は scope に入れ、適切な scope がない場合は `type: subject` 形式を使用してください。本文が必要な場合は、タイトルの後に空行を 1 行入れてください。';
+		return 'Git の変更を分析して、最も適切な Conventional Commit 種別（feat、fix、docs、style、refactor、perf、test、build、ci、chore、revert など）を自分で選択してください。タイトルは必ず `type(scope): subject` 形式で記述してください。変更したファイルまたはモジュールが明確な場合は scope に入れ、適切な scope がない場合は `type: subject` 形式を使用してください。';
 	}
-	return 'Analyze the Git changes and choose the most appropriate Conventional Commit type (such as feat, fix, docs, style, refactor, perf, test, build, ci, chore, or revert). The summary must use `type(scope): subject`. Use a changed file or module as the scope when it is clear; otherwise use `type: subject`. If a body is needed, separate it from the summary with one blank line.';
+	return 'Analyze the Git changes and choose the most appropriate Conventional Commit type (such as feat, fix, docs, style, refactor, perf, test, build, ci, chore, or revert). The summary must use `type(scope): subject`. Use a changed file or module as the scope when it is clear; otherwise use `type: subject`.';
 }
 
 function getCommitMessageMode(): CommitMessageMode {

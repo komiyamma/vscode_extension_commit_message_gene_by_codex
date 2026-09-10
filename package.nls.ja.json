@@ -14,5 +14,5 @@
   "settings.prompt.loadTemplate.ja": "日本語テンプレートをロード",
   "settings.prompt.loadTemplate.ko": "韓国語テンプレートをロード",
   "settings.prompt.loadTemplate.description": "固定の組み込みテンプレートを Prompt Text に読み込みます。現在の本文と編集内容は置き換わります。読み込み後は「選択してください」に戻ります。",
-  "settings.prompt.text.default": "あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。\n\n必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。\n\nサマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。\n\n最終的なコミットメッセージ案だけを返してください。"
+  "settings.prompt.text.default": "あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。\n\n必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。\n\nコミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。\n\n最終的なコミットメッセージ案だけを返してください。"
 }

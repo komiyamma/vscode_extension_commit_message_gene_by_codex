@@ -14,5 +14,5 @@
   "settings.prompt.loadTemplate.ja": "Load Japanese template",
   "settings.prompt.loadTemplate.ko": "Load Korean template",
   "settings.prompt.loadTemplate.description": "Replaces Prompt Text with a fixed built-in template. Any edits to the current text will be replaced. The selection resets after loading.",
-  "settings.prompt.text.default": "You are an assistant that drafts commit messages using the provided Git information.\n\nAll required Git data has already been collected below. Do not run additional git commands.\n\nFollow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English. Do not use Markdown syntax; write in plain text.\n\nReturn only the final commit message proposal."
+  "settings.prompt.text.default": "You are an assistant that drafts commit messages using the provided Git information.\n\nAll required Git data has already been collected below. Do not run additional git commands.\n\nWrite the message in English. Do not use Markdown syntax; write in plain text.\n\nReturn only the final commit message proposal."
 }
