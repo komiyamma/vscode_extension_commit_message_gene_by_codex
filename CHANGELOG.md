@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.4.6
+
+- Updated the model used for commit message generation from `gpt-5.4-mini` to `gpt-5.6-luna`.
+- Fixed the Windows 10/11 badge display in the English and Japanese READMEs.
+
 ## 0.4.5
 
 - Fixed the extension so it works correctly again in AWS Kiro.
