@@ -4,17 +4,18 @@ import { promisify } from 'util';
 import * as path from 'path';
 import { CodexAppServerClient } from './codexAppServerClient';
 
+import { migrateLegacyPrompts, resolvePromptProfile, selectPromptProfile, managePromptProfiles, buildPrompt } from './promptProfiles';
+
 // Promisified wrapper for spawning git commands without direct callback usage.
 const execFileAsync = promisify(execFile);
 // Upper bound for each collected git section to keep prompts within Codex limits.
 const MAX_SECTION_LENGTH = 3000;
 // Soft cap for git stdout when we stream output to avoid buffer exhaustion.
 const GIT_STDOUT_SOFT_LIMIT = 40000;
-const CODEX_MODEL = 'gpt-5.6-luna';
 const CODEX_REASONING_EFFORT = 'low';
 const APP_SERVER_CLIENT_NAME = 'commit_message_gene_by_codex';
 const APP_SERVER_CLIENT_TITLE = 'Commit Message Gene by Codex';
-const APP_SERVER_CLIENT_VERSION = '0.3.31';
+const APP_SERVER_CLIENT_VERSION = '0.5.1';
 
 type GitRepositoryLike = {
 	rootUri?: vscode.Uri;
@@ -39,6 +40,7 @@ const M = {
 };
 
 export async function activate(context: vscode.ExtensionContext) {
+	await migrateLegacyPrompts(context);
 	const output = vscode.window.createOutputChannel('commit message gene');
 	const statusSpinner = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
 	context.subscriptions.push(output, statusSpinner);
@@ -46,9 +48,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	let appServerClient: CodexAppServerClient | undefined;
 	let appServerConnection: Promise<void> | undefined;
 	let appServerConnectionError: string | undefined;
+	let appServerConnectionGeneration = 0;
 	let appServerFirstTurn = true;
 
 	const disconnectAppServer = () => {
+		appServerConnectionGeneration += 1;
 		appServerClient?.close();
 		appServerClient = undefined;
 		appServerConnection = undefined;
@@ -61,31 +65,48 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 
 		output.appendLine('Connecting to Codex app-server...');
+		const connectionGeneration = ++appServerConnectionGeneration;
 		appServerConnection = CodexAppServerClient.connect({
 			clientName: APP_SERVER_CLIENT_NAME,
 			clientTitle: APP_SERVER_CLIENT_TITLE,
 			clientVersion: APP_SERVER_CLIENT_VERSION,
-			model: CODEX_MODEL,
+			model: getCodexModel(),
 			reasoningEffort: CODEX_REASONING_EFFORT,
 			onLog: (message) => output.appendLine(message),
 		})
 			.then((client) => {
+				if (connectionGeneration !== appServerConnectionGeneration) {
+					client.close();
+					return;
+				}
 				appServerClient = client;
 				appServerConnectionError = undefined;
 				output.appendLine(`Connected to Codex app-server (${client.mode}).`);
 			})
 			.catch((error) => {
+				if (connectionGeneration !== appServerConnectionGeneration) {
+					return;
+				}
 				const message = error instanceof Error ? error.message : String(error);
 				appServerConnectionError = message;
 				output.appendLine(`Codex app-server connection failed: ${message}`);
 				appServerClient = undefined;
 			})
 			.finally(() => {
-				appServerConnection = undefined;
+				if (connectionGeneration === appServerConnectionGeneration) {
+					appServerConnection = undefined;
+				}
 			});
 	};
 
 	connectAppServer();
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
+		if (event.affectsConfiguration('commitMessageGene.model')) {
+			output.appendLine('Codex model setting changed; reconnecting to apply it.');
+			disconnectAppServer();
+			connectAppServer();
+		}
+	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => {
 		if (!vscode.workspace.workspaceFolders?.length) {
 			disconnectAppServer();
@@ -94,6 +115,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		connectAppServer();
 	}));
 	context.subscriptions.push({ dispose: disconnectAppServer });
+	context.subscriptions.push(
+		vscode.commands.registerCommand('commit-message-gene-by-codex.selectPromptProfile', () => selectPromptProfile(context)),
+		vscode.commands.registerCommand('commit-message-gene-by-codex.managePromptProfiles', () => managePromptProfiles(context)),
+	);
 
 	// Register the command that gathers git context, queries Codex, and updates the SCM input.
 	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async (...commandArgs: unknown[]) => {
@@ -113,7 +138,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			// vscode.window.showInformationMessage(gitContext);
 
-			const prompt = buildPrompt(gitContext);
+			const prompt = buildPrompt(gitContext, resolvePromptProfile(context));
 			const result = await generateCommitMessage(prompt, workspaceDir, output, {
 				getAppServerClient: () => appServerClient,
 				waitForAppServerConnection: () => appServerConnection,
@@ -549,69 +574,44 @@ function isJapanese(): boolean {
 	return lang === 'ja' || lang.startsWith('ja-');
 }
 
-// Craft the instruction set for Codex, switching language based on UI locale.
-const DEFAULT_INTRO_EN = [
-	'You are an assistant that drafts commit messages using the provided Git information.',
-	'All required Git data has already been collected below. Do not run additional git commands.',
-	'Follow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English. Do not use Markdown syntax; write in plain text.',
-	'Return only the final commit message proposal.'
-];
+function getCodexModel(): string | undefined {
+	const configuredModel = vscode.workspace
+		.getConfiguration('commitMessageGene')
+		.get<string>('model')
+		?.trim();
+	// Removed or unrecognized selections use the same behavior as auto.
+	return configuredModel === 'gpt-5.6-luna' ? configuredModel : undefined;
+}
 
-const DEFAULT_INTRO_JA = [
-	'あなたは収集されたGit情報でコミットメッセージを作成するアシスタントです。',
-	'必要なGitデータはすべて下に用意済みです。追加のgitコマンドは実行しないでください。',
-	'サマリー行はConventional Commitsスタイル（type(scope?): subject）に従い、必要な場合のみ本文を追加してください。コミットメッセージは日本語で記述してください。Markdown表記は使わずプレーンなテキストで記述してください。',
-	'最終的なコミットメッセージ案だけを返してください。'
-];
-
-function buildPrompt(gitContext: string): string {
-	const config = vscode.workspace.getConfiguration();
-	const japanese = isJapanese();
-	const configKey = japanese ? 'commitMessageGene.prompt.intro.ja' : 'commitMessageGene.prompt.intro.en';
-	const defaultIntro = japanese ? DEFAULT_INTRO_JA : DEFAULT_INTRO_EN;
-	const configuredIntro = config.get<string[]>(configKey);
-	const resolvedIntro = Array.isArray(configuredIntro)
-		? configuredIntro
-			.map((line) => (typeof line === 'string' ? line.trim() : ''))
-			.filter((line) => line.length > 0)
-		: [];
-	const introLines = resolvedIntro.length > 0 ? resolvedIntro : defaultIntro;
-
-	return [...introLines, gitContext].join('\n\n');
+function isUnavailableModelError(error: unknown): boolean {
+	const message = error instanceof Error ? error.message : String(error);
+	return /model.*(not supported|requires a newer version|not available)/i.test(message);
 }
 
 async function generateCommitMessageWithSdk(prompt: string, workspaceDir: string): Promise<string | undefined> {
 	// Load the ESM-only Codex package dynamically to avoid require() in CommonJS.
 	const { Codex } = await import('@openai/codex-sdk');
 	const codex = new Codex();
+	const model = getCodexModel();
 	const baseOpts = {
-		model: CODEX_MODEL,
 		workingDirectory: workspaceDir,
 		skipGitRepoCheck: true,
 		modelReasoningEffort: CODEX_REASONING_EFFORT, // minimal/low/medium/high and xhigh(=over 5.2)
 	} as const;
+	const configuredOpts = model ? { ...baseOpts, model } : baseOpts;
 
 	try {
-		const t1 = codex.startThread(baseOpts);
+		const t1 = codex.startThread(configuredOpts);
 		const result = await t1.run(prompt);
 		return result.finalResponse?.trim();
 	} catch (e: any) {
-		/*
-		const msg = (e?.message ?? String(e)).toLowerCase();
-		const isEffortXhighError =
-			msg.includes('param') &&
-			msg.includes('reasoning.effort') &&
-			msg.includes('xhigh') &&
-			(msg.includes('unsupported_value') || msg.includes('unsupported value'));
-
-		if (!isEffortXhighError) {
-			throw e;
+		if (model && isUnavailableModelError(e)) {
+			const t = codex.startThread(baseOpts);
+			const result = await t.run(prompt);
+			return result.finalResponse?.trim();
 		}
-		*/
 
-		const t2 = codex.startThread({ ...baseOpts, modelReasoningEffort: 'medium' });
-		const result = await t2.run(prompt);
-		return result.finalResponse?.trim();
+		throw e;
 	}
 }
 // Stream git stdout while enforcing a soft character limit to prevent buffer overruns.

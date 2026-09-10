@@ -1,0 +1,15 @@
+{
+  "settings.model.description": "全ワークスペース共通の設定です。ユーザー設定で選択してください。ワークスペース設定では上書きできません。コミットメッセージの生成に使用するモデルです。**Codexの既定モデル** はCodexで設定されているモデルを使用します。変更はすぐに反映されます。選択したモデルが利用できない場合は、Codexの既定モデルで再試行します。初期値は **GPT-5.6 Luna** です。",
+  "settings.messageMode.description": "生成するメッセージをタイトル1行だけにするか、本文にコードや動作の変更内容も含めるかを選択します。",
+  "settings.prompt.profile.description": "使用するプロンプトのプロファイルです。`auto`はVS CodeのUI言語に従います（日本語・韓国語、それ以外は英語）。**Commit Message Gene: プロンプトプロファイルを選択** コマンドで、組み込みまたは保存済みのカスタムプロファイルを読み込めます。Prompt Textが空でない場合は、その本文が優先されます。",
+  "settings.prompt.text.description": "生成に使用するプロンプト本文を自由に編集できます。空の場合は、選択中のプロファイルの本文を使用します。入力した場合は、この内容が優先されます。**Commit Message Gene: プロンプトプロファイルを管理** コマンドで、カスタムプロファイルとして保存できます。",
+  "settings.model.auto": "Codexで設定されているモデルを使用します。",
+  "settings.model.gpt-5.6-luna": "アカウントとCodexのバージョンで利用可能な場合、gpt-5.6-lunaを使用します。",
+  "settings.messageMode.summary": "Conventional Commits形式のタイトル1行だけを生成します。",
+  "settings.messageMode.detailed": "タイトルの後に空行を入れ、具体的な変更内容を2～6件の箇条書きで記述します。",
+  "commands.generate": "Codexでコミットメッセージを生成",
+  "commands.selectPromptProfile": "Commit Message Gene: プロンプトプロファイルを選択",
+  "commands.managePromptProfiles": "Commit Message Gene: プロンプトプロファイルを管理",
+  "settings.model.auto.label": "Codexの既定モデル",
+  "settings.model.gpt-5.6-luna.label": "GPT-5.6 Luna"
+}

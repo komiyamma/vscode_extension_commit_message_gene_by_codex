@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.5.1
+
+- Model choices are **GPT-5.6 Luna** (default) and **Codex default**. Codex default uses the model configured in Codex; previous unsupported selections also use that behavior. Existing explicit user selections are preserved.
+- Made model selection application-wide so workspace settings cannot override it.
+- Localized settings descriptions, option descriptions, and command titles for Japanese and Korean UI languages.
+
+## 0.5.0
+
+- Added model selection with default-model fallback, summary/detailed modes, and English/Japanese/Korean prompt profiles.
+- Import legacy prompt settings once into custom profiles and remove the old settings after saving.
+- Guard against stale app-server connections when changing models.
+- Updated the Codex SDK to 0.153.4.
+
 ## 0.4.6
 
 - Updated the model used for commit message generation from `gpt-5.4-mini` to `gpt-5.6-luna`.

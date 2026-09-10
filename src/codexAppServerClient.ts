@@ -22,13 +22,14 @@ type PendingRequest = {
 export type AppServerTurnResult = {
 	status: string;
 	output: string;
+	error?: string;
 };
 
 export type AppServerClientOptions = {
 	clientName: string;
 	clientTitle: string;
 	clientVersion: string;
-	model: string;
+	model?: string;
 	reasoningEffort: 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
 	onLog?: (message: string) => void;
 };
@@ -93,7 +94,7 @@ export class CodexAppServerClient {
 			throw new Error('Codex app-server is already processing a turn.');
 		}
 
-		this.runningTurn = this.runFreshTurnInner(prompt, cwd, sessionStartSource);
+		this.runningTurn = this.runFreshTurnWithModelFallback(prompt, cwd, sessionStartSource);
 		try {
 			return await this.runningTurn;
 		} finally {
@@ -162,9 +163,26 @@ export class CodexAppServerClient {
 		this.send({ method: 'initialized', params: {} });
 	}
 
-	private async runFreshTurnInner(prompt: string, cwd: string, sessionStartSource: 'startup' | 'clear'): Promise<AppServerTurnResult> {
+	private async runFreshTurnWithModelFallback(prompt: string, cwd: string, sessionStartSource: 'startup' | 'clear'): Promise<AppServerTurnResult> {
+		try {
+			return await this.runFreshTurnInner(prompt, cwd, sessionStartSource, this.options.model);
+		} catch (error) {
+			if (!this.options.model || !isUnavailableModelError(error)) {
+				throw error;
+			}
+			this.options.onLog?.(`Configured model '${this.options.model}' is unavailable. Retrying with Codex's default model.`);
+			return this.runFreshTurnInner(prompt, cwd, sessionStartSource, undefined);
+		}
+	}
+
+	private async runFreshTurnInner(
+		prompt: string,
+		cwd: string,
+		sessionStartSource: 'startup' | 'clear',
+		model: string | undefined,
+	): Promise<AppServerTurnResult> {
 		const threadResponse = await this.request('thread/start', {
-			model: this.options.model,
+			...(model ? { model } : {}),
 			approvalPolicy: 'never',
 			sandbox: 'workspace-write',
 			cwd,
@@ -186,7 +204,9 @@ export class CodexAppServerClient {
 				effort: this.options.reasoningEffort,
 			});
 			assertOk(turnResponse, 'turn/start');
-			return await this.waitForTurnCompleted();
+			const result = await this.waitForTurnCompleted();
+			if (result.status === 'failed' && result.error) { throw new Error(result.error); }
+			return result;
 		} finally {
 			try {
 				const unsubscribeResponse = await this.request('thread/unsubscribe', { threadId });
@@ -262,6 +282,7 @@ export class CodexAppServerClient {
 			const result = {
 				status: typeof message.params?.turn?.status === 'string' ? message.params.turn.status : 'unknown',
 				output: this.agentMessages.join('\n').trim(),
+				error: typeof message.params?.turn?.error?.message === 'string' ? message.params.turn.error.message : undefined,
 			};
 			this.agentMessages.length = 0;
 
@@ -279,4 +300,9 @@ function assertOk(response: JsonRpcResponse, method: string): void {
 	if (response.error) {
 		throw new Error(`${method} failed: ${JSON.stringify(response.error)}`);
 	}
+}
+
+function isUnavailableModelError(error: unknown): boolean {
+	const message = error instanceof Error ? error.message : String(error);
+	return /model.*(not supported|requires a newer version|not available)/i.test(message);
 }
