@@ -10,7 +10,7 @@ const execFileAsync = promisify(execFile);
 const MAX_SECTION_LENGTH = 3000;
 // Soft cap for git stdout when we stream output to avoid buffer exhaustion.
 const GIT_STDOUT_SOFT_LIMIT = 40000;
-const CODEX_MODEL = 'gpt-5.4-mini';
+const CODEX_MODEL = 'gpt-5.6-luna';
 const CODEX_REASONING_EFFORT = 'low';
 const APP_SERVER_CLIENT_NAME = 'commit_message_gene_by_codex';
 const APP_SERVER_CLIENT_TITLE = 'Commit Message Gene by Codex';
