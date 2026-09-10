@@ -3,7 +3,7 @@
   "name": "commit-message-gene-by-codex",
   "displayName": "Commit Message Gene by Codex",
   "description": "This extension automatically generates commit messages in Codex environments. It is intended for use when GitHub Copilot is unavailable, or when using VSCodium-family editors such as Antigravity and AWS Kiro.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/komiyamma/vscode_extension_commit_message_gene_by_codex"
@@ -32,16 +32,6 @@
         "command": "commit-message-gene-by-codex.runCodexCmd",
         "title": "%commands.generate%",
         "icon": "$(sparkle-filled)"
-      },
-      {
-        "command": "commit-message-gene-by-codex.selectPromptProfile",
-        "title": "%commands.selectPromptProfile%",
-        "icon": "$(comment-discussion)"
-      },
-      {
-        "command": "commit-message-gene-by-codex.managePromptProfiles",
-        "title": "%commands.managePromptProfiles%",
-        "icon": "$(settings-gear)"
       }
     ],
     "menus": {
@@ -56,11 +46,6 @@
         {
           "command": "commit-message-gene-by-codex.runCodexCmd",
           "group": "navigation@100",
-          "when": "scmProvider == git"
-        },
-        {
-          "command": "commit-message-gene-by-codex.selectPromptProfile",
-          "group": "navigation@90",
           "when": "scmProvider == git"
         }
       ]
@@ -99,18 +84,32 @@
           ],
           "markdownDescription": "%settings.messageMode.description%"
         },
-        "commitMessageGene.prompt.profile": {
-          "type": "string",
-          "default": "auto",
-          "markdownDescription": "%settings.prompt.profile.description%",
-          "scope": "window"
-        },
         "commitMessageGene.prompt.text": {
           "type": "string",
           "editPresentation": "multilineText",
           "markdownDescription": "%settings.prompt.text.description%",
-          "default": "",
-          "scope": "window"
+          "default": "%settings.prompt.text.default%",
+          "scope": "application",
+          "order": 11
+        },
+        "commitMessageGene.prompt.loadTemplate": {
+          "type": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "en",
+            "ja",
+            "ko"
+          ],
+          "enumItemLabels": [
+            "%settings.prompt.loadTemplate.none%",
+            "%settings.prompt.loadTemplate.en%",
+            "%settings.prompt.loadTemplate.ja%",
+            "%settings.prompt.loadTemplate.ko%"
+          ],
+          "markdownDescription": "%settings.prompt.loadTemplate.description%",
+          "scope": "application",
+          "order": 10
         }
       }
     }

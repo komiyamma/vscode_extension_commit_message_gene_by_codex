@@ -1,16 +1,14 @@
 # Change Log
 
-## 0.5.1
+## 0.5.2
 
-- Model choices are **GPT-5.6 Luna** (default) and **Codex default**. Codex default uses the model configured in Codex; previous unsupported selections also use that behavior. Existing explicit user selections are preserved.
-- Made model selection application-wide so workspace settings cannot override it.
-- Localized settings descriptions, option descriptions, and command titles for Japanese and Korean UI languages.
-
-## 0.5.0
-
-- Added model selection with default-model fallback, summary/detailed modes, and English/Japanese/Korean prompt profiles.
-- Import legacy prompt settings once into custom profiles and remove the old settings after saving.
-- Guard against stale app-server connections when changing models.
+- Added model selection: **GPT-5.6 Luna** (default) or **Codex default**, shared across workspaces. Retry with the Codex default model when the selected model is unavailable.
+- Added `summary` (one-line title) and `detailed` (title and 2–6 change bullets) output modes.
+- Added a single editable prompt, initially populated for the VS Code UI language and saved in User Settings for all workspaces.
+- Added fixed English, Japanese, and Korean template loading in Settings. Loading replaces the current prompt text and resets the selector; editing the text does not change the built-in templates.
+- Back up legacy `prompt.intro.en/ja` settings from 0.4.x before removing them, and migrate the active text for the UI language without overwriting existing Prompt Text.
+- Localized settings and template choices for Japanese and Korean.
+- Prevent stale app-server connections from being reused after model changes.
 - Updated the Codex SDK to 0.153.4.
 
 ## 0.4.6

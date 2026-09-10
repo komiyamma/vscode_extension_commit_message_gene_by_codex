@@ -1,15 +1,18 @@
 {
   "settings.model.description": "모든 작업 영역에 공통으로 적용됩니다. 사용자 설정에서 선택하세요. 작업 영역 설정에서는 재정의할 수 없습니다. 커밋 메시지 생성에 사용할 모델입니다. **Codex 기본 모델**은 Codex에 설정된 모델을 사용합니다. 변경 사항은 즉시 적용됩니다. 선택한 모델을 사용할 수 없으면 Codex 기본 모델로 다시 시도합니다. 기본 선택값은 **GPT-5.6 Luna**입니다.",
   "settings.messageMode.description": "제목 한 줄만 생성할지, 본문에 코드와 동작의 변경 내용도 포함할지 선택합니다.",
-  "settings.prompt.profile.description": "사용할 프롬프트 프로필입니다. `auto`는 VS Code UI 언어를 따릅니다(일본어, 한국어, 그 외에는 영어). **Commit Message Gene: 프롬프트 프로필 선택** 명령으로 기본 또는 저장된 사용자 프로필을 불러올 수 있습니다. Prompt Text가 비어 있지 않으면 해당 텍스트가 우선합니다.",
-  "settings.prompt.text.description": "생성에 사용할 프롬프트 텍스트를 자유롭게 편집할 수 있습니다. 비워 두면 선택한 프로필의 텍스트를 사용합니다. 입력한 내용이 있으면 이 텍스트가 우선합니다. **Commit Message Gene: 프롬프트 프로필 관리** 명령으로 사용자 프로필에 저장할 수 있습니다.",
+  "settings.prompt.text.description": "생성에 사용할 프롬프트입니다. 자유롭게 편집할 수 있으며 모든 작업 영역에 공통으로 적용됩니다. 위에서 템플릿을 불러오면 기본 내용으로 돌아갑니다.",
   "settings.model.auto": "Codex에 설정된 모델을 사용합니다.",
   "settings.model.gpt-5.6-luna": "계정과 Codex 버전에서 사용할 수 있으면 gpt-5.6-luna 모델을 사용합니다.",
   "settings.messageMode.summary": "Conventional Commits 형식의 제목 한 줄만 생성합니다.",
   "settings.messageMode.detailed": "제목 뒤에 빈 줄을 넣고, 구체적인 변경 내용을 2~6개의 글머리 기호 항목으로 작성합니다.",
   "commands.generate": "Codex로 커밋 메시지 생성",
-  "commands.selectPromptProfile": "Commit Message Gene: 프롬프트 프로필 선택",
-  "commands.managePromptProfiles": "Commit Message Gene: 프롬프트 프로필 관리",
   "settings.model.auto.label": "Codex 기본 모델",
-  "settings.model.gpt-5.6-luna.label": "GPT-5.6 Luna"
+  "settings.model.gpt-5.6-luna.label": "GPT-5.6 Luna",
+  "settings.prompt.loadTemplate.none": "템플릿을 선택하세요",
+  "settings.prompt.loadTemplate.en": "영어 템플릿 불러오기",
+  "settings.prompt.loadTemplate.ja": "일본어 템플릿 불러오기",
+  "settings.prompt.loadTemplate.ko": "한국어 템플릿 불러오기",
+  "settings.prompt.loadTemplate.description": "고정된 기본 템플릿으로 Prompt Text를 덮어씁니다. 현재 편집 내용은 교체됩니다. 불러온 후 선택이 초기화됩니다.",
+  "settings.prompt.text.default": "제공된 Git 정보를 바탕으로 커밋 메시지 초안을 작성하는 도우미입니다.\n\n필요한 Git 정보는 아래에 이미 수집되어 있습니다. 추가 Git 명령을 실행하지 마세요.\n\n요약 줄은 Conventional Commits 형식(type(scope?): subject)을 따르고, 변경 사항을 설명하는 데 도움이 될 때만 본문을 추가하세요. 메시지는 한국어로 작성하세요. Markdown 문법을 사용하지 말고 일반 텍스트로 작성하세요.\n\n최종 커밋 메시지 제안만 반환하세요."
 }

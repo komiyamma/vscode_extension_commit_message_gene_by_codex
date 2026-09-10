@@ -1,15 +1,18 @@
 {
   "settings.model.description": "Shared across all workspaces. Configure this in User Settings; workspace settings cannot override it. Model used to generate commit messages. **Codex default** uses the model configured in Codex. Changes take effect immediately. If the selected model is unavailable, the extension retries with the Codex default model. The default selection is **GPT-5.6 Luna**.",
   "settings.messageMode.description": "Choose whether to return only a summary or include details of code and behavior changes in the message body.",
-  "settings.prompt.profile.description": "Active prompt profile. `auto` follows the VS Code UI language (Japanese, Korean, or English for other languages). Use **Commit Message Gene: Select Prompt Profile** to load a built-in or saved custom profile. A nonempty Prompt Text overrides the profile text.",
-  "settings.prompt.text.description": "Optional prompt text for generation. Leave empty to use the active profile text. When nonempty, this text takes priority. Use **Commit Message Gene: Manage Prompt Profiles** to save it as a custom profile.",
+  "settings.prompt.text.description": "The prompt used for generation. Edit freely; changes apply to all workspaces. Load a template above to restore its original text.",
   "settings.model.auto": "Use the model configured in Codex.",
   "settings.model.gpt-5.6-luna": "Use gpt-5.6-luna, if available for your account and Codex version.",
   "settings.messageMode.summary": "Return only the Conventional Commit summary line.",
   "settings.messageMode.detailed": "Return the summary followed by a blank line and 2–6 bullets describing concrete changes.",
   "commands.generate": "Commit message generation by codex",
-  "commands.selectPromptProfile": "Commit Message Gene: Select Prompt Profile",
-  "commands.managePromptProfiles": "Commit Message Gene: Manage Prompt Profiles",
   "settings.model.auto.label": "Codex default",
-  "settings.model.gpt-5.6-luna.label": "GPT-5.6 Luna"
+  "settings.model.gpt-5.6-luna.label": "GPT-5.6 Luna",
+  "settings.prompt.loadTemplate.none": "Select a template",
+  "settings.prompt.loadTemplate.en": "Load English template",
+  "settings.prompt.loadTemplate.ja": "Load Japanese template",
+  "settings.prompt.loadTemplate.ko": "Load Korean template",
+  "settings.prompt.loadTemplate.description": "Replaces Prompt Text with a fixed built-in template. Any edits to the current text will be replaced. The selection resets after loading.",
+  "settings.prompt.text.default": "You are an assistant that drafts commit messages using the provided Git information.\n\nAll required Git data has already been collected below. Do not run additional git commands.\n\nFollow the Conventional Commits style (type(scope?): subject) for the summary line and add a body only if it helps explain the change. Write the message in English. Do not use Markdown syntax; write in plain text.\n\nReturn only the final commit message proposal."
 }

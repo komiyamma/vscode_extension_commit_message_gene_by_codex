@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import * as path from 'path';
 import { CodexAppServerClient } from './codexAppServerClient';
 
-import { migrateLegacyPrompts, resolvePromptProfile, selectPromptProfile, managePromptProfiles, buildPrompt } from './promptProfiles';
+import { initializePromptSettings, resolvePromptProfile, buildPrompt } from './promptProfiles';
 
 // Promisified wrapper for spawning git commands without direct callback usage.
 const execFileAsync = promisify(execFile);
@@ -15,7 +15,7 @@ const GIT_STDOUT_SOFT_LIMIT = 40000;
 const CODEX_REASONING_EFFORT = 'low';
 const APP_SERVER_CLIENT_NAME = 'commit_message_gene_by_codex';
 const APP_SERVER_CLIENT_TITLE = 'Commit Message Gene by Codex';
-const APP_SERVER_CLIENT_VERSION = '0.5.1';
+const APP_SERVER_CLIENT_VERSION = '0.5.2';
 
 type GitRepositoryLike = {
 	rootUri?: vscode.Uri;
@@ -40,7 +40,7 @@ const M = {
 };
 
 export async function activate(context: vscode.ExtensionContext) {
-	await migrateLegacyPrompts(context);
+	await initializePromptSettings(context);
 	const output = vscode.window.createOutputChannel('commit message gene');
 	const statusSpinner = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1000);
 	context.subscriptions.push(output, statusSpinner);
@@ -115,10 +115,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		connectAppServer();
 	}));
 	context.subscriptions.push({ dispose: disconnectAppServer });
-	context.subscriptions.push(
-		vscode.commands.registerCommand('commit-message-gene-by-codex.selectPromptProfile', () => selectPromptProfile(context)),
-		vscode.commands.registerCommand('commit-message-gene-by-codex.managePromptProfiles', () => managePromptProfiles(context)),
-	);
 
 	// Register the command that gathers git context, queries Codex, and updates the SCM input.
 	const disposable = vscode.commands.registerCommand('commit-message-gene-by-codex.runCodexCmd', async (...commandArgs: unknown[]) => {
@@ -138,7 +134,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			// vscode.window.showInformationMessage(gitContext);
 
-			const prompt = buildPrompt(gitContext, resolvePromptProfile(context));
+			const prompt = buildPrompt(gitContext, resolvePromptProfile());
 			const result = await generateCommitMessage(prompt, workspaceDir, output, {
 				getAppServerClient: () => appServerClient,
 				waitForAppServerConnection: () => appServerConnection,
